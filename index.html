@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>S15 原画 + 炫神解说</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;background:#000;color:#eee;height:100vh;display:flex;flex-direction:column}
+  header{background:#18181b;padding:10px 15px;font-size:14px;display:flex;align-items:center;gap:10px}
+  .live{background:#ff4655;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
+  .box{flex:1;display:flex;gap:8px;padding:8px}
+  iframe{width:100%;height:100%;border:0}
+  .ctrl{position:fixed;bottom:15px;right:15px;background:rgba(0,0,0,.7);padding:10px 15px;border-radius:6px;font-size:13px}
+  .ctrl label{margin-right:8px}input[type=range]{width:120px}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="live">LIVE</span>
+  <span>S15 官方画面 + Last炫神解说</span>
+</header>
+
+<section class="box">
+  <!-- 1. 官方比赛画面（静音） -->
+  <iframe id="video"
+          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1"
+          allow="autoplay; encrypted-media">
+  </iframe>
+
+  <!-- 2. 炫神解说（小窗，不出画面只出声） -->
+  <iframe id="audio"
+          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1"
+          style="width:1px;height:1px;position:absolute;left:-9999px">
+  </iframe>
+</section>
+
+<div class="ctrl">
+  <label>解说音量</label>
+  <input type="range" id="vol" min="0" max="100" value="70">
+  <span id="vl">70%</span>
+</div>
+
+<script>
+// 音量滑杆
+const vol = document.getElementById('vol');
+const vl  = document.getElementById('vl');
+const aFrame = document.getElementById('audio');
+vol.oninput = () => {
+  vl.textContent = vol.value + '%';
+  // 跨域下无法直接控制 iframe 内视频，这里只是 UI 示意
+  // 用户需在「小窗」里手动调一次音量后，浏览器会记住
+};
+// 提示用户手动静音官方画面
+window.onload = () => {
+  setTimeout(()=>{
+    alert('使用说明：\n1. 在左侧官方画面点击右上角「静音」图标；\n2. 右侧解说小窗已隐藏，会自动出声；\n3. 随时可换 cid 值来切换直播间。');
+  },1500);
+};
+</script>
+</body>
+</html>
