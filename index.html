@@ -8,7 +8,7 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;background:#000;color:#eee;height:100vh;display:flex;flex-direction:column;overflow:hidden}
   
-  header{background:#18181b;padding:10px 15px;font-size:14px;display:flex;align-items:center;gap:10px;z-index:10}
+  header{background:#18181b;padding:10px 15px;font-size:14px;display:flex;align-items:center;gap:10px;z-index:10;position:relative}
   .live{background:#ff4655;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
   
   .status{
@@ -41,13 +41,59 @@
     50%{opacity:.3}
   }
   
+  /* 🆕 刷新按钮 */
+  .refresh-controls{
+    display:flex;
+    gap:8px;
+    margin-left:15px;
+  }
+  
+  .refresh-btn{
+    background:rgba(102,126,234,.2);
+    border:1px solid rgba(102,126,234,.4);
+    color:#fff;
+    padding:4px 12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:12px;
+    transition:all .2s;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  
+  .refresh-btn:hover{
+    background:rgba(102,126,234,.4);
+    border-color:rgba(102,126,234,.6);
+    transform:translateY(-1px);
+  }
+  
+  .refresh-btn:active{
+    transform:translateY(0);
+  }
+  
+  .refresh-btn.loading{
+    opacity:.6;
+    cursor:not-allowed;
+  }
+  
+  .refresh-btn.loading .icon{
+    animation:spin .8s linear infinite;
+  }
+  
+  @keyframes spin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+  }
+  
   .box{flex:1;display:flex;gap:0;padding:0;position:relative}
   iframe{width:100%;height:100%;border:0}
   
   /* ========== 智能折叠音频播放器 ========== */
   .audio-widget{
     position:fixed;
-    bottom:15px;
+    /* 🔧 默认右上角位置 */
+    top:50px;
     right:15px;
     background:rgba(0,0,0,.95);
     border-radius:10px;
@@ -143,15 +189,14 @@
     pointer-events:none;
   }
   
-  /* 🔧 拖动时的视觉反馈 */
+  /* 🔧 拖动时的视觉反馈（禁用过渡） */
   .audio-widget.dragging{
     opacity:.9;
     box-shadow:0 12px 40px rgba(102,126,234,.5);
     cursor:move !important;
-    transition:none !important; /* 🆕 拖动时禁用过渡动画 */
+    transition:none !important;
   }
   
-  /* 🔧 拖动时禁用 hover 效果 */
   .audio-widget.dragging .audio-header{
     cursor:move !important;
   }
@@ -236,6 +281,18 @@
   <span class="live">LIVE</span>
   <span>S15 官方画面 + Last炫神解说</span>
   
+  <!-- 🆕 刷新按钮 -->
+  <div class="refresh-controls">
+    <button class="refresh-btn" id="refreshMain">
+      <span class="icon">🔄</span>
+      <span>刷新主画面</span>
+    </button>
+    <button class="refresh-btn" id="refreshAudio">
+      <span class="icon">🔄</span>
+      <span>刷新解说</span>
+    </button>
+  </div>
+  
   <div class="status">
     <span class="dot loading" id="statusDot"></span>
     <span id="statusText">正在连接...</span>
@@ -243,11 +300,11 @@
 </header>
 
 <section class="box">
-  <!-- 🔧 官方画面（静音） -->
+  <!-- 官方画面 -->
   <iframe id="video"
-          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1&muted=1"
+          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1"
           sandbox="allow-scripts allow-same-origin allow-presentation"
-          allow="autoplay *; encrypted-media *; fullscreen *"
+          allow="autoplay; encrypted-media; fullscreen"
           referrerpolicy="no-referrer">
   </iframe>
 </section>
@@ -255,7 +312,7 @@
 <!-- ========== 智能折叠音频播放器 ========== -->
 <div class="audio-widget collapsed" id="audioWidget">
   <!-- 提示气泡 -->
-  <div class="hint-bubble" id="hintBubble">👆 点击展开播放器</div>
+  <div class="hint-bubble" id="hintBubble">👆 点击展开播放器并手动调节音量</div>
   
   <!-- 标题栏（可拖动） -->
   <div class="audio-header" id="audioHeader">
@@ -266,12 +323,12 @@
     <span class="audio-toggle" id="audioToggle">▲</span>
   </div>
   
-  <!-- 🔧 播放器区域（有声音） -->
+  <!-- 播放器区域 -->
   <div class="audio-player">
     <iframe id="audio"
             src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1"
             sandbox="allow-scripts allow-same-origin allow-presentation"
-            allow="autoplay *; encrypted-media *"
+            allow="autoplay; encrypted-media"
             referrerpolicy="no-referrer"
             style="width:100%;height:100%;border:0">
     </iframe>
@@ -301,24 +358,55 @@ function log(msg) {
 
 log('页面开始加载');
 
-// ========== iframe 加载监控 ==========
+// ========== iframe 引用 ==========
 const videoFrame = document.getElementById('video');
 const audioFrame = document.getElementById('audio');
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
 
+// ========== 🆕 刷新功能 ==========
+const refreshMainBtn = document.getElementById('refreshMain');
+const refreshAudioBtn = document.getElementById('refreshAudio');
+
+refreshMainBtn.onclick = () => {
+  log('🔄 刷新主画面');
+  refreshMainBtn.classList.add('loading');
+  const currentSrc = videoFrame.src;
+  videoFrame.src = '';
+  setTimeout(() => {
+    videoFrame.src = currentSrc;
+    setTimeout(() => {
+      refreshMainBtn.classList.remove('loading');
+    }, 1000);
+  }, 100);
+};
+
+refreshAudioBtn.onclick = () => {
+  log('🔄 刷新解说音频');
+  refreshAudioBtn.classList.add('loading');
+  const currentSrc = audioFrame.src;
+  audioFrame.src = '';
+  setTimeout(() => {
+    audioFrame.src = currentSrc;
+    setTimeout(() => {
+      refreshAudioBtn.classList.remove('loading');
+    }, 1000);
+  }, 100);
+};
+
+// ========== iframe 加载监控 ==========
 let videoLoaded = false;
 let audioLoaded = false;
 
 videoFrame.onload = () => {
   videoLoaded = true;
-  log('✓ 官方画面加载完成（静音）');
+  log('✓ 官方画面加载完成');
   checkBothLoaded();
 };
 
 audioFrame.onload = () => {
   audioLoaded = true;
-  log('✓ 解说音频加载完成（有声音）');
+  log('✓ 解说音频加载完成');
   checkBothLoaded();
 };
 
@@ -335,7 +423,8 @@ function checkBothLoaded() {
     setTimeout(() => {
       statusDot.className = 'dot success';
       statusText.textContent = '播放中';
-      log('✅ 直播播放中（官方画面静音，解说有声）');
+      log('✅ 直播播放中');
+      log('⚠️ B站播放器限制：需手动在小窗口中调节音量');
       
       // 显示提示气泡
       showHintBubble();
@@ -368,7 +457,7 @@ function restoreState() {
     log('默认折叠状态');
   }
   
-  // 恢复位置
+  // 🔧 恢复位置（如果没有保存则使用默认右上角位置）
   if (savedPosition) {
     try {
       const pos = JSON.parse(savedPosition);
@@ -378,8 +467,10 @@ function restoreState() {
       audioWidget.style.bottom = 'auto';
       log(`恢复位置: ${pos.left}, ${pos.top}`);
     } catch (e) {
-      log('位置恢复失败');
+      log('位置恢复失败，使用默认位置');
     }
+  } else {
+    log('使用默认位置：右上角');
   }
 }
 
@@ -411,170 +502,163 @@ function showHintBubble() {
     
     setTimeout(() => {
       hintBubble.classList.remove('show');
-    }, 5000);
+    }, 8000); // 延长显示时间
     
     log('显示操作提示');
   }
 }
 
-// ========== 🔧 拖动功能（修复版） ==========
+// ========== 🔧 拖动功能（完全重写，修复Bug） ==========
 const audioHeader = document.getElementById('audioHeader');
 let isDragging = false;
-let startX = 0;
-let startY = 0;
-let offsetX = 0;
-let offsetY = 0;
-let hasMoved = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let widgetStartLeft = 0;
+let widgetStartTop = 0;
 
-// 🔧 鼠标按下（只在标题栏上）
-audioHeader.addEventListener('mousedown', (e) => {
+// 🔧 仅在 mousedown 时设置标志
+audioHeader.addEventListener('mousedown', function(e) {
   // 如果点击的是切换按钮，不触发拖动
   if (e.target.closest('#audioToggle')) {
-    log('点击了切换按钮，不触发拖动');
+    return;
+  }
+  
+  // 只响应左键
+  if (e.button !== 0) {
     return;
   }
   
   isDragging = true;
-  hasMoved = false;
   audioWidget.classList.add('dragging');
   
-  startX = e.clientX;
-  startY = e.clientY;
+  // 记录鼠标起始位置
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
   
+  // 记录组件起始位置
   const rect = audioWidget.getBoundingClientRect();
-  offsetX = rect.left;
-  offsetY = rect.top;
+  widgetStartLeft = rect.left;
+  widgetStartTop = rect.top;
   
   e.preventDefault();
-  log('🖱️ 开始拖动准备');
+  log('🖱️ 按下鼠标，准备拖动');
 });
 
-// 🔧 鼠标移动（全局监听，但只在 isDragging 时生效）
-document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-  
-  const deltaX = e.clientX - startX;
-  const deltaY = e.clientY - startY;
-  
-  // 移动超过5px才算真正拖动
-  if (!hasMoved && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
-    hasMoved = true;
-    log('🖱️ 开始拖动');
+// 🔧 全局 mousemove，但只在 isDragging=true 时执行
+document.addEventListener('mousemove', function(e) {
+  // 🔧 关键：只有在 isDragging 为 true 时才移动
+  if (!isDragging) {
+    return;
   }
   
-  if (hasMoved) {
-    let newLeft = offsetX + deltaX;
-    let newTop = offsetY + deltaY;
-    
-    // 边界限制
-    const maxX = window.innerWidth - audioWidget.offsetWidth;
-    const maxY = window.innerHeight - audioWidget.offsetHeight;
-    
-    newLeft = Math.max(0, Math.min(newLeft, maxX));
-    newTop = Math.max(0, Math.min(newTop, maxY));
-    
-    audioWidget.style.left = newLeft + 'px';
-    audioWidget.style.top = newTop + 'px';
-    audioWidget.style.right = 'auto';
-    audioWidget.style.bottom = 'auto';
-  }
+  // 计算鼠标移动距离
+  const deltaX = e.clientX - dragStartX;
+  const deltaY = e.clientY - dragStartY;
+  
+  // 计算新位置
+  let newLeft = widgetStartLeft + deltaX;
+  let newTop = widgetStartTop + deltaY;
+  
+  // 边界限制
+  const maxX = window.innerWidth - audioWidget.offsetWidth;
+  const maxY = window.innerHeight - audioWidget.offsetHeight;
+  
+  newLeft = Math.max(0, Math.min(newLeft, maxX));
+  newTop = Math.max(0, Math.min(newTop, maxY));
+  
+  // 应用位置
+  audioWidget.style.left = newLeft + 'px';
+  audioWidget.style.top = newTop + 'px';
+  audioWidget.style.right = 'auto';
+  audioWidget.style.bottom = 'auto';
 });
 
-// 🔧 鼠标松开（全局监听）
-document.addEventListener('mouseup', (e) => {
-  if (!isDragging) return;
+// 🔧 全局 mouseup，重置拖动状态
+document.addEventListener('mouseup', function(e) {
+  if (!isDragging) {
+    return;
+  }
   
   isDragging = false;
   audioWidget.classList.remove('dragging');
   
-  if (hasMoved) {
-    // 保存位置
-    const position = {
-      left: audioWidget.style.left,
-      top: audioWidget.style.top
-    };
-    localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
-    log(`💾 保存位置: ${position.left}, ${position.top}`);
-  } else {
-    log('🖱️ 未移动，取消拖动');
-  }
-  
-  hasMoved = false;
+  // 保存位置
+  const position = {
+    left: audioWidget.style.left,
+    top: audioWidget.style.top
+  };
+  localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
+  log(`💾 保存位置: ${position.left}, ${position.top}`);
 });
 
-// 🔧 鼠标离开窗口时也要重置状态
-document.addEventListener('mouseleave', () => {
+// 🔧 鼠标离开窗口时重置状态
+document.addEventListener('mouseleave', function() {
   if (isDragging) {
     isDragging = false;
     audioWidget.classList.remove('dragging');
-    log('🖱️ 鼠标离开窗口，取消拖动');
+    log('🖱️ 鼠标离开窗口，停止拖动');
   }
 });
 
 // ========== 触摸设备支持 ==========
-audioHeader.addEventListener('touchstart', (e) => {
+let touchStartX = 0;
+let touchStartY = 0;
+let touchWidgetStartLeft = 0;
+let touchWidgetStartTop = 0;
+let isTouching = false;
+
+audioHeader.addEventListener('touchstart', function(e) {
   if (e.target.closest('#audioToggle')) return;
   
   const touch = e.touches[0];
-  isDragging = true;
-  hasMoved = false;
+  isTouching = true;
   audioWidget.classList.add('dragging');
   
-  startX = touch.clientX;
-  startY = touch.clientY;
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
   
   const rect = audioWidget.getBoundingClientRect();
-  offsetX = rect.left;
-  offsetY = rect.top;
+  touchWidgetStartLeft = rect.left;
+  touchWidgetStartTop = rect.top;
   
   e.preventDefault();
-  log('📱 触摸拖动开始');
+  log('📱 触摸开始');
 });
 
-document.addEventListener('touchmove', (e) => {
-  if (!isDragging) return;
+document.addEventListener('touchmove', function(e) {
+  if (!isTouching) return;
   
   const touch = e.touches[0];
-  const deltaX = touch.clientX - startX;
-  const deltaY = touch.clientY - startY;
+  const deltaX = touch.clientX - touchStartX;
+  const deltaY = touch.clientY - touchStartY;
   
-  if (!hasMoved && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
-    hasMoved = true;
-  }
+  let newLeft = touchWidgetStartLeft + deltaX;
+  let newTop = touchWidgetStartTop + deltaY;
   
-  if (hasMoved) {
-    let newLeft = offsetX + deltaX;
-    let newTop = offsetY + deltaY;
-    
-    const maxX = window.innerWidth - audioWidget.offsetWidth;
-    const maxY = window.innerHeight - audioWidget.offsetHeight;
-    
-    newLeft = Math.max(0, Math.min(newLeft, maxX));
-    newTop = Math.max(0, Math.min(newTop, maxY));
-    
-    audioWidget.style.left = newLeft + 'px';
-    audioWidget.style.top = newTop + 'px';
-    audioWidget.style.right = 'auto';
-    audioWidget.style.bottom = 'auto';
-  }
+  const maxX = window.innerWidth - audioWidget.offsetWidth;
+  const maxY = window.innerHeight - audioWidget.offsetHeight;
+  
+  newLeft = Math.max(0, Math.min(newLeft, maxX));
+  newTop = Math.max(0, Math.min(newTop, maxY));
+  
+  audioWidget.style.left = newLeft + 'px';
+  audioWidget.style.top = newTop + 'px';
+  audioWidget.style.right = 'auto';
+  audioWidget.style.bottom = 'auto';
 });
 
-document.addEventListener('touchend', () => {
-  if (!isDragging) return;
+document.addEventListener('touchend', function() {
+  if (!isTouching) return;
   
-  isDragging = false;
+  isTouching = false;
   audioWidget.classList.remove('dragging');
   
-  if (hasMoved) {
-    const position = {
-      left: audioWidget.style.left,
-      top: audioWidget.style.top
-    };
-    localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
-    log('📱 触摸拖动结束，保存位置');
-  }
-  
-  hasMoved = false;
+  const position = {
+    left: audioWidget.style.left,
+    top: audioWidget.style.top
+  };
+  localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
+  log('📱 触摸结束，保存位置');
 });
 
 // ========== 窗口大小调整时的边界检查 ==========
@@ -583,12 +667,12 @@ window.addEventListener('resize', () => {
   
   if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
     audioWidget.style.left = 'auto';
-    audioWidget.style.top = 'auto';
+    audioWidget.style.top = '50px';
     audioWidget.style.right = '15px';
-    audioWidget.style.bottom = '15px';
+    audioWidget.style.bottom = 'auto';
     
     localStorage.removeItem(STORAGE_KEY_POSITION);
-    log('窗口调整，重置位置');
+    log('窗口调整，重置位置到右上角');
   }
 });
 
@@ -615,25 +699,37 @@ document.addEventListener('keydown', (e) => {
     debugPanel.classList.toggle('show', debugEnabled);
     log(`🐛 调试模式: ${debugEnabled ? '开启' : '关闭'}`);
   }
+  
+  // 🆕 Ctrl+R 刷新主画面
+  if (e.ctrlKey && e.key === 'r' && !e.shiftKey) {
+    e.preventDefault();
+    refreshMainBtn.click();
+  }
+  
+  // 🆕 Ctrl+Shift+R 刷新解说音频
+  if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+    e.preventDefault();
+    refreshAudioBtn.click();
+  }
 });
 
 // ========== 右键菜单（快捷操作） ==========
 audioWidget.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   
-  // 右键点击：重置位置
+  // 右键点击：重置位置到右上角
   audioWidget.style.left = 'auto';
-  audioWidget.style.top = 'auto';
+  audioWidget.style.top = '50px';
   audioWidget.style.right = '15px';
-  audioWidget.style.bottom = '15px';
+  audioWidget.style.bottom = 'auto';
   
   localStorage.removeItem(STORAGE_KEY_POSITION);
   
-  log('🖱️ 右键重置位置');
+  log('🖱️ 右键重置位置到右上角');
   
   // 短暂显示提示
   const originalText = hintBubble.textContent;
-  hintBubble.textContent = '✓ 位置已重置';
+  hintBubble.textContent = '✓ 位置已重置到右上角';
   hintBubble.classList.add('show');
   
   setTimeout(() => {
@@ -642,20 +738,50 @@ audioWidget.addEventListener('contextmenu', (e) => {
   }, 2000);
 });
 
+// ========== 🆕 检测音频播放状态 ==========
+let audioCheckTimer;
+function startAudioCheck() {
+  audioCheckTimer = setTimeout(() => {
+    log('⚠️ 音频检测提示');
+    log('📢 如果听不到解说音频，请：');
+    log('   1. 展开小窗口播放器');
+    log('   2. 在播放器内手动点击调节音量');
+    log('   3. B站播放器需要用户交互才能播放声音');
+    
+    // 显示提示气泡
+    hintBubble.textContent = '⚠️ 请展开播放器并手动调节音量';
+    hintBubble.classList.add('show');
+    
+    setTimeout(() => {
+      hintBubble.textContent = '👆 点击展开播放器并手动调节音量';
+      hintBubble.classList.remove('show');
+    }, 5000);
+  }, 3000);
+}
+
 // ========== 页面加载完成 ==========
 window.addEventListener('load', () => {
   // 恢复上次的状态
   restoreState();
   
   log('✅ 页面初始化完成');
-  log('📺 官方画面：静音模式');
-  log('🎙️ 炫神解说：有声音');
+  log('📺 官方画面：主窗口');
+  log('🎙️ 炫神解说：右上角小窗口');
+  log('');
+  log('⚠️ 重要提示：');
+  log('   由于浏览器安全策略，B站播放器需要用户手动交互');
+  log('   请展开小窗口并在播放器内点击调节音量以启用声音');
   log('');
   log('🎮 快捷键提示:');
   log('  • Ctrl/Cmd + Space: 切换折叠/展开');
   log('  • ESC: 快速折叠');
-  log('  • 右键播放器: 重置位置');
+  log('  • Ctrl + R: 刷新主画面');
+  log('  • Ctrl + Shift + R: 刷新解说音频');
+  log('  • 右键播放器: 重置位置到右上角');
   log('  • Ctrl+Shift+D: 开启/关闭调试日志');
+  
+  // 开始音频检测
+  startAudioCheck();
 });
 
 // ========== 页面可见性检测 ==========
@@ -680,6 +806,40 @@ let loadTimer = setTimeout(() => {
 if (videoLoaded && audioLoaded) {
   clearTimeout(loadTimer);
 }
+
+// ========== 🆕 防止意外拖动的额外保护 ==========
+// 确保只有在真正按下鼠标时才能拖动
+document.addEventListener('dragstart', (e) => {
+  e.preventDefault();
+  return false;
+});
+
+// 防止选中文字时触发拖动
+audioHeader.addEventListener('selectstart', (e) => {
+  if (isDragging) {
+    e.preventDefault();
+  }
+});
+
+// ========== 🆕 音频问题说明 ==========
+log('');
+log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+log('📢 关于音频问题的说明：');
+log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+log('');
+log('根据控制台日志，B站播放器存在以下限制：');
+log('');
+log('1. ❌ iframe 的 autoplay 权限受浏览器限制');
+log('2. ❌ 跨域安全策略阻止音频控制');
+log('3. ❌ sandbox 属性限制了自动播放');
+log('');
+log('解决方案：');
+log('✅ 用户必须手动在小窗口播放器内交互');
+log('✅ 展开播放器，点击音量按钮或播放按钮');
+log('✅ 这是浏览器安全策略，无法通过代码绕过');
+log('');
+log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+log('');
 </script>
 </body>
 </html>
