@@ -5,14 +5,134 @@
 <title>S15 原画 + 炫神解说</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
+  /* 全局重置：移除默认边距、设置盒模型 */
   *{margin:0;padding:0;box-sizing:border-box}
+  
+  /* 页面主体：暗色背景、白色文字、垂直布局填满屏幕 */
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;background:#000;color:#eee;height:100vh;display:flex;flex-direction:column}
+  
+  /* 顶部标题栏：深灰背景、水平布局 */
   header{background:#18181b;padding:10px 15px;font-size:14px;display:flex;align-items:center;gap:10px}
+  
+  /* LIVE 红色标签 */
   .live{background:#ff4655;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
+  
+  /* 连接状态指示器 */
+  .status{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-left:auto; /* 推到右侧 */
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:4px;
+    background:rgba(255,255,255,.1);
+  }
+  /* 状态指示灯 */
+  .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#666;
+    animation:pulse 1.5s ease-in-out infinite; /* 默认灰色脉动 */
+  }
+  .dot.loading{background:#ffa500} /* 橙色=连接中 */
+  .dot.success{background:#0f0;animation:none} /* 绿色=已连接 */
+  .dot.error{background:#f00;animation:blink 1s infinite} /* 红色=失败 */
+  
+  @keyframes pulse{
+    0%,100%{opacity:.4}
+    50%{opacity:1}
+  }
+  @keyframes blink{
+    0%,100%{opacity:1}
+    50%{opacity:.3}
+  }
+  
+  /* 主内容区：占据剩余空间、横向排列 */
   .box{flex:1;display:flex;gap:8px;padding:8px}
+  
+  /* iframe 全宽高、无边框 */
   iframe{width:100%;height:100%;border:0}
-  .ctrl{position:fixed;bottom:15px;right:15px;background:rgba(0,0,0,.7);padding:10px 15px;border-radius:6px;font-size:13px}
-  .ctrl label{margin-right:8px}input[type=range]{width:120px}
+  
+  /* 🆕 音量控制浮窗：可拖动、可折叠 */
+  .ctrl{
+    position:fixed;
+    bottom:15px;
+    right:15px;
+    background:rgba(0,0,0,.85);
+    border-radius:8px;
+    font-size:13px;
+    box-shadow:0 4px 12px rgba(0,0,0,.5);
+    min-width:200px;
+    user-select:none; /* 拖动时防止选中文字 */
+  }
+  
+  /* 🆕 标题栏：可拖动区域 */
+  .ctrl-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 12px;
+    background:rgba(255,255,255,.1);
+    border-radius:8px 8px 0 0;
+    cursor:move; /* 鼠标指针显示为可移动 */
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  
+  .ctrl-title{
+    font-weight:600;
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  
+  /* 🆕 折叠按钮 */
+  .ctrl-toggle{
+    cursor:pointer;
+    padding:2px 6px;
+    border-radius:4px;
+    transition:background .2s;
+    font-size:16px;
+    line-height:1;
+  }
+  .ctrl-toggle:hover{
+    background:rgba(255,255,255,.2);
+  }
+  
+  /* 🆕 内容区：可折叠 */
+  .ctrl-content{
+    padding:12px 15px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:all .3s ease; /* 折叠动画 */
+    overflow:hidden;
+  }
+  
+  /* 🆕 折叠状态 */
+  .ctrl.collapsed .ctrl-content{
+    padding:0;
+    height:0;
+    opacity:0;
+  }
+  
+  .ctrl.collapsed .ctrl-toggle{
+    transform:rotate(180deg); /* 箭头翻转 */
+  }
+  
+  .ctrl label{margin:0}
+  input[type=range]{
+    width:100px;
+    flex:1;
+  }
+  
+  /* 🆕 拖动时的视觉反馈 */
+  .ctrl.dragging{
+    opacity:.8;
+    cursor:move;
+  }
 </style>
 </head>
 <body>
@@ -20,6 +140,12 @@
 <header>
   <span class="live">LIVE</span>
   <span>S15 官方画面 + Last炫神解说</span>
+  
+  <!-- 连接状态显示 -->
+  <div class="status">
+    <span class="dot loading" id="statusDot"></span>
+    <span id="statusText">连接炫神直播间...</span>
+  </div>
 </header>
 
 <section class="box">
@@ -29,34 +155,191 @@
           allow="autoplay; encrypted-media">
   </iframe>
 
-  <!-- 2. 炫神解说（小窗，不出画面只出声） -->
+  <!-- 2. 炫神解说音频（隐藏 iframe，只播放声音） -->
   <iframe id="audio"
           src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1"
           style="width:1px;height:1px;position:absolute;left:-9999px">
   </iframe>
 </section>
 
-<div class="ctrl">
-  <label>解说音量</label>
-  <input type="range" id="vol" min="0" max="100" value="70">
-  <span id="vl">70%</span>
+<!-- 🆕 可折叠、可拖动的音量控制面板 -->
+<div class="ctrl" id="ctrlPanel">
+  <!-- 标题栏：拖动手柄 -->
+  <div class="ctrl-header" id="ctrlHeader">
+    <div class="ctrl-title">
+      🎙️ 解说音量
+    </div>
+    <span class="ctrl-toggle" id="ctrlToggle">▼</span>
+  </div>
+  
+  <!-- 内容区：可折叠 -->
+  <div class="ctrl-content">
+    <label>音量</label>
+    <input type="range" id="vol" min="0" max="100" value="70">
+    <span id="vl">70%</span>
+  </div>
 </div>
 
 <script>
-// 音量滑杆
+// ========== 1. 音量控制（UI 层面） ==========
 const vol = document.getElementById('vol');
 const vl  = document.getElementById('vl');
 const aFrame = document.getElementById('audio');
+
 vol.oninput = () => {
   vl.textContent = vol.value + '%';
-  // 跨域下无法直接控制 iframe 内视频，这里只是 UI 示意
-  // 用户需在「小窗」里手动调一次音量后，浏览器会记住
+  // ⚠️ 跨域限制无法直接控制 iframe 内视频
 };
-// 提示用户手动静音官方画面
+
+// ========== 2. 检测炫神直播间连接状态 ==========
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+aFrame.onload = () => {
+  statusDot.className = 'dot success';
+  statusText.textContent = '炫神直播间已连接 ✓';
+};
+
+aFrame.onerror = () => {
+  statusDot.className = 'dot error';
+  statusText.textContent = '连接失败！';
+};
+
+let loadTimer = setTimeout(() => {
+  if (statusDot.className === 'dot loading') {
+    statusDot.className = 'dot error';
+    statusText.textContent = '连接超时';
+  }
+}, 10000);
+
+aFrame.addEventListener('load', () => {
+  clearTimeout(loadTimer);
+});
+
+// ========== 🆕 3. 面板折叠功能 ==========
+const ctrlPanel = document.getElementById('ctrlPanel');
+const ctrlToggle = document.getElementById('ctrlToggle');
+
+// 点击折叠/展开按钮
+ctrlToggle.onclick = (e) => {
+  e.stopPropagation(); // 阻止事件冒泡（避免触发拖动）
+  ctrlPanel.classList.toggle('collapsed'); // 切换 collapsed 类
+};
+
+// ========== 🆕 4. 面板拖动功能 ==========
+const ctrlHeader = document.getElementById('ctrlHeader');
+
+// 拖动状态变量
+let isDragging = false;  // 是否正在拖动
+let startX = 0;          // 鼠标起始 X 坐标
+let startY = 0;          // 鼠标起始 Y 坐标
+let offsetX = 0;         // 面板初始 X 偏移
+let offsetY = 0;         // 面板初始 Y 偏移
+
+// 鼠标按下：开始拖动
+ctrlHeader.onmousedown = (e) => {
+  isDragging = true;
+  ctrlPanel.classList.add('dragging');
+  
+  // 记录鼠标起始位置
+  startX = e.clientX;
+  startY = e.clientY;
+  
+  // 获取面板当前位置
+  const rect = ctrlPanel.getBoundingClientRect();
+  offsetX = rect.left;
+  offsetY = rect.top;
+  
+  // 阻止默认行为（避免选中文字）
+  e.preventDefault();
+};
+
+// 鼠标移动：实时更新面板位置
+document.onmousemove = (e) => {
+  if (!isDragging) return;
+  
+  // 计算鼠标移动距离
+  const deltaX = e.clientX - startX;
+  const deltaY = e.clientY - startY;
+  
+  // 计算新位置
+  let newLeft = offsetX + deltaX;
+  let newTop = offsetY + deltaY;
+  
+  // 🆕 边界限制：防止拖出屏幕
+  const maxX = window.innerWidth - ctrlPanel.offsetWidth;
+  const maxY = window.innerHeight - ctrlPanel.offsetHeight;
+  
+  newLeft = Math.max(0, Math.min(newLeft, maxX));
+  newTop = Math.max(0, Math.min(newTop, maxY));
+  
+  // 应用新位置（切换为 left/top 定位）
+  ctrlPanel.style.left = newLeft + 'px';
+  ctrlPanel.style.top = newTop + 'px';
+  ctrlPanel.style.right = 'auto';  // 取消 right 定位
+  ctrlPanel.style.bottom = 'auto'; // 取消 bottom 定位
+};
+
+// 鼠标松开：结束拖动
+document.onmouseup = () => {
+  if (isDragging) {
+    isDragging = false;
+    ctrlPanel.classList.remove('dragging');
+  }
+};
+
+// 🆕 触摸设备支持（移动端拖动）
+ctrlHeader.ontouchstart = (e) => {
+  const touch = e.touches[0];
+  isDragging = true;
+  startX = touch.clientX;
+  startY = touch.clientY;
+  
+  const rect = ctrlPanel.getBoundingClientRect();
+  offsetX = rect.left;
+  offsetY = rect.top;
+  
+  e.preventDefault();
+};
+
+document.ontouchmove = (e) => {
+  if (!isDragging) return;
+  
+  const touch = e.touches[0];
+  const deltaX = touch.clientX - startX;
+  const deltaY = touch.clientY - startY;
+  
+  let newLeft = offsetX + deltaX;
+  let newTop = offsetY + deltaY;
+  
+  const maxX = window.innerWidth - ctrlPanel.offsetWidth;
+  const maxY = window.innerHeight - ctrlPanel.offsetHeight;
+  
+  newLeft = Math.max(0, Math.min(newLeft, maxX));
+  newTop = Math.max(0, Math.min(newTop, maxY));
+  
+  ctrlPanel.style.left = newLeft + 'px';
+  ctrlPanel.style.top = newTop + 'px';
+  ctrlPanel.style.right = 'auto';
+  ctrlPanel.style.bottom = 'auto';
+};
+
+document.ontouchend = () => {
+  isDragging = false;
+};
+
+// ========== 5. 页面加载完成提示 ==========
 window.onload = () => {
-  setTimeout(()=>{
-    alert('使用说明：\n1. 在左侧官方画面点击右上角「静音」图标；\n2. 右侧解说小窗已隐藏，会自动出声；\n3. 随时可换 cid 值来切换直播间。');
-  },1500);
+  setTimeout(() => {
+    alert(
+      '使用说明：\n' +
+      '1. 在左侧官方画面点击右上角「静音」图标；\n' +
+      '2. 右侧解说小窗已隐藏，会自动出声；\n' +
+      '3. 随时可换 cid 值来切换直播间；\n' +
+      '4. 查看右上角连接状态指示灯；\n' +
+      '🆕 5. 右下角面板可拖动移动、点击箭头可折叠！'
+    );
+  }, 1500);
 };
 </script>
 </body>
