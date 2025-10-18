@@ -44,7 +44,7 @@
   .box{flex:1;display:flex;gap:0;padding:0;position:relative}
   iframe{width:100%;height:100%;border:0}
   
-  /* ========== 🆕 智能折叠音频播放器 ========== */
+  /* 智能折叠音频播放器 */
   .audio-widget{
     position:fixed;
     bottom:15px;
@@ -59,19 +59,16 @@
     transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  /* 折叠状态：只显示标题栏 */
   .audio-widget.collapsed{
     width:200px !important;
     height:40px !important;
   }
   
-  /* 展开状态：显示完整播放器 */
   .audio-widget.expanded{
     width:320px !important;
     height:220px !important;
   }
   
-  /* 标题栏：可拖动区域 */
   .audio-header{
     display:flex;
     align-items:center;
@@ -106,7 +103,6 @@
     50%{transform:scale(1.1)}
   }
   
-  /* 折叠/展开按钮 */
   .audio-toggle{
     cursor:pointer;
     padding:4px 8px;
@@ -130,7 +126,6 @@
     transform:rotate(180deg) scale(1.1);
   }
   
-  /* 播放器容器 */
   .audio-player{
     width:100%;
     height:180px;
@@ -145,14 +140,12 @@
     pointer-events:none;
   }
   
-  /* 拖动时的视觉反馈 */
   .audio-widget.dragging{
     opacity:.9;
     box-shadow:0 12px 40px rgba(102,126,234,.5);
-    cursor:move;
+    cursor:move !important;
   }
   
-  /* 🆕 首次使用提示气泡 */
   .hint-bubble{
     position:absolute;
     top:-50px;
@@ -193,58 +186,54 @@
     50%{transform:translateX(-50%) translateY(-5px)}
   }
   
-  /* 启动按钮遮罩层 */
-  .overlay{
+  /* 🆕 备用提示层（自动播放被阻止时显示） */
+  .fallback-hint{
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
     background:rgba(0,0,0,.95);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
+    padding:30px 40px;
+    border-radius:12px;
+    box-shadow:0 8px 32px rgba(0,0,0,.8);
     z-index:9999;
-    transition:opacity .5s;
+    display:none;
+    text-align:center;
   }
-  .overlay.hidden{
-    opacity:0;
-    pointer-events:none;
+  
+  .fallback-hint.show{
+    display:block;
   }
-  .start-btn{
+  
+  .fallback-hint h3{
+    color:#667eea;
+    margin-bottom:15px;
+    font-size:18px;
+  }
+  
+  .fallback-hint p{
+    color:#999;
+    margin-bottom:20px;
+    font-size:14px;
+  }
+  
+  .fallback-btn{
     background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
     color:#fff;
     border:none;
-    padding:15px 40px;
-    font-size:18px;
-    font-weight:700;
-    border-radius:50px;
+    padding:12px 30px;
+    font-size:16px;
+    font-weight:600;
+    border-radius:25px;
     cursor:pointer;
-    box-shadow:0 8px 20px rgba(102,126,234,.3);
     transition:all .3s;
   }
-  .start-btn:hover{
+  
+  .fallback-btn:hover{
     transform:translateY(-2px);
-    box-shadow:0 12px 30px rgba(102,126,234,.5);
-  }
-  .start-btn:active{
-    transform:translateY(0);
-  }
-  .hint{
-    margin-top:20px;
-    font-size:13px;
-    color:#999;
-    text-align:center;
-    max-width:400px;
-  }
-  .hint.warning{
-    color:#ff4655;
-    font-weight:600;
-    margin-top:10px;
+    box-shadow:0 8px 20px rgba(102,126,234,.5);
   }
 
-  /* 调试日志 */
   .debug{
     position:fixed;
     top:60px;
@@ -265,7 +254,6 @@
   .debug.show{display:block}
   .debug div{margin:2px 0}
   
-  /* 🆕 响应式适配 */
   @media (max-width: 768px) {
     .audio-widget.expanded{
       width:280px !important;
@@ -279,40 +267,37 @@
 </head>
 <body>
 
-<!-- 启动遮罩层 -->
-<div class="overlay" id="overlay">
-  <button class="start-btn" id="startBtn">🎬 点击开始观看</button>
-  <div class="hint">需要用户交互才能播放音频</div>
-  <div class="hint warning" id="protocolWarning" style="display:none">
-    ⚠️ 检测到 file:// 协议！请使用 HTTP 服务器访问
-  </div>
+<!-- 🆕 备用提示层（仅在自动播放失败时显示） -->
+<div class="fallback-hint" id="fallbackHint">
+  <h3>🔊 需要您的操作</h3>
+  <p>浏览器阻止了自动播放音频<br>点击下方按钮开始播放</p>
+  <button class="fallback-btn" id="fallbackBtn">▶️ 开始播放</button>
 </div>
 
 <header>
   <span class="live">LIVE</span>
-  <span>S15 官方画面 + Last炫神解说</span>
+  <span>S15 官方画面（静音）+ Last炫神解说（有声）</span>
   
   <div class="status">
     <span class="dot loading" id="statusDot"></span>
-    <span id="statusText">等待启动...</span>
+    <span id="statusText">正在连接...</span>
   </div>
 </header>
 
 <section class="box">
-  <!-- 官方画面（全屏） -->
+  <!-- 🆕 官方画面（静音） -->
   <iframe id="video"
+          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1&volume=0"
           sandbox="allow-scripts allow-same-origin allow-presentation"
-          allow="autoplay *; encrypted-media *; fullscreen *"
+          allow="autoplay; encrypted-media; fullscreen"
           referrerpolicy="no-referrer">
   </iframe>
 </section>
 
-<!-- ========== 🆕 智能折叠音频播放器 ========== -->
+<!-- 智能折叠音频播放器 -->
 <div class="audio-widget collapsed" id="audioWidget">
-  <!-- 提示气泡 -->
   <div class="hint-bubble" id="hintBubble">👆 点击展开播放器</div>
   
-  <!-- 标题栏（可拖动） -->
   <div class="audio-header" id="audioHeader">
     <div class="audio-title">
       <span class="audio-icon">🎙️</span>
@@ -321,24 +306,24 @@
     <span class="audio-toggle" id="audioToggle">▲</span>
   </div>
   
-  <!-- 播放器区域（可折叠） -->
   <div class="audio-player">
+    <!-- 🆕 音频播放器（有声） -->
     <iframe id="audio"
+            src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1"
             sandbox="allow-scripts allow-same-origin allow-presentation"
-            allow="autoplay *; encrypted-media *"
+            allow="autoplay; encrypted-media"
             referrerpolicy="no-referrer"
             style="width:100%;height:100%;border:0">
     </iframe>
   </div>
 </div>
 
-<!-- 调试日志 -->
 <div class="debug" id="debug"></div>
 
 <script>
-// ========== 调试日志系统 ==========
+// ========== 调试日志 ==========
 const debugPanel = document.getElementById('debug');
-let debugEnabled = false; // 🆕 默认关闭，需要时改为 true
+let debugEnabled = false;
 
 function log(msg) {
   const now = new Date().toLocaleTimeString();
@@ -358,30 +343,16 @@ const protocol = window.location.protocol;
 log(`当前协议: ${protocol}`);
 
 if (protocol === 'file:') {
-  document.getElementById('protocolWarning').style.display = 'block';
-  log('⚠️ 警告：正在使用 file:// 协议');
+  log('⚠️ 警告：正在使用 file:// 协议，建议使用 HTTPS');
 }
 
-// ========== 用户交互启动 ==========
-const overlay = document.getElementById('overlay');
-const startBtn = document.getElementById('startBtn');
+// ========== 获取元素 ==========
 const videoFrame = document.getElementById('video');
 const audioFrame = document.getElementById('audio');
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
-
-startBtn.onclick = () => {
-  log('用户点击启动按钮');
-  
-  videoFrame.src = 'https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1';
-  audioFrame.src = 'https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1';
-  
-  overlay.classList.add('hidden');
-  
-  statusDot.className = 'dot loading';
-  statusText.textContent = '正在连接...';
-  log('开始加载直播流');
-};
+const fallbackHint = document.getElementById('fallbackHint');
+const fallbackBtn = document.getElementById('fallbackBtn');
 
 // ========== iframe 加载监控 ==========
 let videoLoaded = false;
@@ -389,13 +360,13 @@ let audioLoaded = false;
 
 videoFrame.onload = () => {
   videoLoaded = true;
-  log('✓ 官方画面加载完成');
+  log('✓ 官方画面加载完成（静音）');
   checkBothLoaded();
 };
 
 audioFrame.onload = () => {
   audioLoaded = true;
-  log('✓ 解说音频加载完成');
+  log('✓ 解说音频加载完成（有声）');
   checkBothLoaded();
 };
 
@@ -414,39 +385,64 @@ function checkBothLoaded() {
       statusText.textContent = '已连接';
       log('✅ 播放器已初始化');
       
-      // 🆕 显示提示气泡
-      showHintBubble();
+      // 🆕 检测是否需要用户交互
+      checkAutoplaySupport();
     }, 2000);
   }
 }
 
-// ========== 🆕 智能折叠功能 ========== 
+// ========== 🆕 检测自动播放支持 ==========
+function checkAutoplaySupport() {
+  // 延迟5秒检测，如果没有声音则显示提示
+  setTimeout(() => {
+    // 这里无法直接检测音频是否播放（跨域限制）
+    // 所以显示提示气泡引导用户
+    showHintBubble();
+    
+    log('💡 提示：如果没有声音，请展开播放器并点击播放按钮');
+  }, 3000);
+}
+
+// ========== 🆕 备用交互按钮 ==========
+fallbackBtn.onclick = () => {
+  log('用户点击备用启动按钮');
+  
+  // 重新加载音频 iframe（带用户交互）
+  const audioSrc = audioFrame.src;
+  audioFrame.src = '';
+  setTimeout(() => {
+    audioFrame.src = audioSrc;
+  }, 100);
+  
+  fallbackHint.classList.remove('show');
+  
+  setTimeout(() => {
+    showHintBubble();
+  }, 1000);
+};
+
+// ========== 智能折叠功能 ========== 
 const audioWidget = document.getElementById('audioWidget');
 const audioToggle = document.getElementById('audioToggle');
 const hintBubble = document.getElementById('hintBubble');
 
-// LocalStorage 键名
 const STORAGE_KEY_COLLAPSED = 'audioWidget_collapsed';
 const STORAGE_KEY_POSITION = 'audioWidget_position';
 
-// 恢复上次的折叠状态
 function restoreState() {
   const savedCollapsed = localStorage.getItem(STORAGE_KEY_COLLAPSED);
   const savedPosition = localStorage.getItem(STORAGE_KEY_POSITION);
   
-  // 恢复折叠状态
   if (savedCollapsed === 'false') {
     audioWidget.classList.remove('collapsed');
     audioWidget.classList.add('expanded');
     log('恢复展开状态');
   } else {
-    // 默认折叠
     audioWidget.classList.add('collapsed');
     audioWidget.classList.remove('expanded');
     log('默认折叠状态');
   }
   
-  // 恢复位置
   if (savedPosition) {
     try {
       const pos = JSON.parse(savedPosition);
@@ -467,30 +463,25 @@ audioToggle.onclick = (e) => {
   const isCollapsed = audioWidget.classList.contains('collapsed');
   
   if (isCollapsed) {
-    // 展开
     audioWidget.classList.remove('collapsed');
     audioWidget.classList.add('expanded');
     localStorage.setItem(STORAGE_KEY_COLLAPSED, 'false');
     log('展开播放器');
   } else {
-    // 折叠
     audioWidget.classList.remove('expanded');
     audioWidget.classList.add('collapsed');
     localStorage.setItem(STORAGE_KEY_COLLAPSED, 'true');
     log('折叠播放器');
   }
   
-  // 隐藏提示气泡
   hintBubble.classList.remove('show');
 };
 
-// 🆕 显示提示气泡（首次使用或加载完成后）
 function showHintBubble() {
   const isCollapsed = audioWidget.classList.contains('collapsed');
   if (isCollapsed) {
     hintBubble.classList.add('show');
     
-    // 5秒后自动隐藏
     setTimeout(() => {
       hintBubble.classList.remove('show');
     }, 5000);
@@ -499,22 +490,24 @@ function showHintBubble() {
   }
 }
 
-// ========== 🆕 拖动功能 ==========
+// ========== 🔧 修复拖动功能 ==========
 const audioHeader = document.getElementById('audioHeader');
-let isDragging = false;
+let isDragging = false;  // 🆕 严格控制拖动状态
 let startX = 0;
 let startY = 0;
 let offsetX = 0;
 let offsetY = 0;
-let hasMoved = false; // 🆕 区分点击和拖动
 
-// 鼠标按下
-audioHeader.onmousedown = (e) => {
+// 🆕 鼠标按下：仅在标题栏按下时才开始拖动
+audioHeader.addEventListener('mousedown', (e) => {
   // 如果点击的是切换按钮，不触发拖动
-  if (e.target.closest('#audioToggle')) return;
+  if (e.target.closest('#audioToggle')) {
+    return;
+  }
   
+  // 🆕 设置拖动状态为 true
   isDragging = true;
-  hasMoved = false;
+  
   audioWidget.classList.add('dragging');
   
   startX = e.clientX;
@@ -526,19 +519,17 @@ audioHeader.onmousedown = (e) => {
   
   e.preventDefault();
   log('开始拖动');
-};
+});
 
-// 鼠标移动
-document.onmousemove = (e) => {
-  if (!isDragging) return;
+// 🆕 鼠标移动：全局监听，但只在 isDragging 为 true 时执行
+document.addEventListener('mousemove', (e) => {
+  // 🆕 关键修复：只有 isDragging 为 true 才移动
+  if (!isDragging) {
+    return;
+  }
   
   const deltaX = e.clientX - startX;
   const deltaY = e.clientY - startY;
-  
-  // 移动超过5px才算真正拖动（避免误触）
-  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-    hasMoved = true;
-  }
   
   let newLeft = offsetX + deltaX;
   let newTop = offsetY + deltaY;
@@ -554,33 +545,39 @@ document.onmousemove = (e) => {
   audioWidget.style.top = newTop + 'px';
   audioWidget.style.right = 'auto';
   audioWidget.style.bottom = 'auto';
-};
+});
 
-// 鼠标松开
-document.onmouseup = () => {
-  if (isDragging) {
-    isDragging = false;
-    audioWidget.classList.remove('dragging');
-    
-    if (hasMoved) {
-      // 保存位置
-      const position = {
-        left: audioWidget.style.left,
-        top: audioWidget.style.top
-      };
-      localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
-      log(`保存位置: ${position.left}, ${position.top}`);
-    }
+// 🆕 鼠标松开：全局监听，立即重置 isDragging
+document.addEventListener('mouseup', () => {
+  if (!isDragging) {
+    return;
   }
-};
+  
+  // 🆕 关键修复：立即设置为 false
+  isDragging = false;
+  
+  audioWidget.classList.remove('dragging');
+  
+  // 保存位置
+  const position = {
+    left: audioWidget.style.left,
+    top: audioWidget.style.top
+  };
+  
+  if (position.left && position.top) {
+    localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
+    log(`保存位置: ${position.left}, ${position.top}`);
+  }
+});
 
-// ========== 🆕 触摸设备支持 ==========
-audioHeader.ontouchstart = (e) => {
-  if (e.target.closest('#audioToggle')) return;
+// ========== 🆕 触摸设备支持（同样修复） ==========
+audioHeader.addEventListener('touchstart', (e) => {
+  if (e.target.closest('#audioToggle')) {
+    return;
+  }
   
   const touch = e.touches[0];
   isDragging = true;
-  hasMoved = false;
   
   startX = touch.clientX;
   startY = touch.clientY;
@@ -590,18 +587,16 @@ audioHeader.ontouchstart = (e) => {
   offsetY = rect.top;
   
   e.preventDefault();
-};
+});
 
-document.ontouchmove = (e) => {
-  if (!isDragging) return;
+document.addEventListener('touchmove', (e) => {
+  if (!isDragging) {
+    return;
+  }
   
   const touch = e.touches[0];
   const deltaX = touch.clientX - startX;
   const deltaY = touch.clientY - startY;
-  
-  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-    hasMoved = true;
-  }
   
   let newLeft = offsetX + deltaX;
   let newTop = offsetY + deltaY;
@@ -616,94 +611,69 @@ document.ontouchmove = (e) => {
   audioWidget.style.top = newTop + 'px';
   audioWidget.style.right = 'auto';
   audioWidget.style.bottom = 'auto';
-};
+});
 
-document.ontouchend = () => {
-  if (isDragging) {
-    isDragging = false;
-    
-    if (hasMoved) {
-      const position = {
-        left: audioWidget.style.left,
-        top: audioWidget.style.top
-      };
-      localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
-    }
+document.addEventListener('touchend', () => {
+  if (!isDragging) {
+    return;
   }
-};
+  
+  isDragging = false;
+  
+  const position = {
+    left: audioWidget.style.left,
+    top: audioWidget.style.top
+  };
+  
+  if (position.left && position.top) {
+    localStorage.setItem(STORAGE_KEY_POSITION, JSON.stringify(position));
+  }
+});
 
-// ========== 🆕 窗口大小调整时的边界检查 ==========
+// ========== 窗口大小调整时的边界检查 ==========
 window.addEventListener('resize', () => {
   const rect = audioWidget.getBoundingClientRect();
   
-  // 如果超出屏幕，重新定位
   if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
     audioWidget.style.left = 'auto';
     audioWidget.style.top = 'auto';
     audioWidget.style.right = '15px';
     audioWidget.style.bottom = '15px';
     
-    // 清除保存的位置
     localStorage.removeItem(STORAGE_KEY_POSITION);
     log('窗口调整，重置位置');
   }
 });
 
-// ========== 🆕 键盘快捷键 ==========
+// ========== 键盘快捷键 ==========
 document.addEventListener('keydown', (e) => {
-  // 按 Space 键切换折叠/展开（需要 Ctrl 或 Cmd 修饰键，避免误触）
+  // Ctrl/Cmd + Space 切换折叠
   if ((e.ctrlKey || e.metaKey) && e.code === 'Space') {
     e.preventDefault();
     audioToggle.click();
     log('快捷键切换折叠状态');
   }
   
-  // 按 ESC 键快速折叠
+  // ESC 快速折叠
   if (e.code === 'Escape' && !audioWidget.classList.contains('collapsed')) {
     e.preventDefault();
     audioToggle.click();
     log('ESC 快速折叠');
   }
-});
-
-// ========== 🆕 监听用户点击播放器（检测交互） ==========
-let userInteracted = false;
-
-document.addEventListener('click', (e) => {
-  if (!userInteracted && e.target.closest('.audio-player')) {
-    userInteracted = true;
-    log('✓ 用户已点击播放器');
-    
-    // 更新状态提示
-    setTimeout(() => {
-      statusText.textContent = '播放中';
-    }, 500);
-  }
-}, true);
-
-// ========== 超时检测 ==========
-let loadTimer;
-startBtn.addEventListener('click', () => {
-  loadTimer = setTimeout(() => {
-    if (!audioLoaded) {
-      log('✗ 音频加载超时');
-      statusDot.className = 'dot error';
-      statusText.textContent = '连接超时';
-    }
-  }, 10000);
-});
-
-audioFrame.addEventListener('load', () => {
-  if (loadTimer) {
-    clearTimeout(loadTimer);
+  
+  // Ctrl+Shift+D 切换调试模式
+  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+    e.preventDefault();
+    debugEnabled = !debugEnabled;
+    debugPanel.classList.toggle('show', debugEnabled);
+    log(`调试模式: ${debugEnabled ? '开启' : '关闭'}`);
   }
 });
 
-// ========== 🆕 右键菜单（快捷操作） ==========
+// ========== 右键菜单（重置位置） ==========
 audioWidget.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   
-  // 右键点击：重置位置
   audioWidget.style.left = 'auto';
   audioWidget.style.top = 'auto';
   audioWidget.style.right = '15px';
@@ -713,7 +683,6 @@ audioWidget.addEventListener('contextmenu', (e) => {
   
   log('右键重置位置');
   
-  // 短暂显示提示
   const originalText = hintBubble.textContent;
   hintBubble.textContent = '✓ 位置已重置';
   hintBubble.classList.add('show');
@@ -724,25 +693,51 @@ audioWidget.addEventListener('contextmenu', (e) => {
   }, 2000);
 });
 
+// ========== 监听用户点击播放器 ==========
+let userInteracted = false;
+
+document.addEventListener('click', (e) => {
+  if (!userInteracted && e.target.closest('.audio-player')) {
+    userInteracted = true;
+    log('✓ 用户已点击音频播放器');
+    
+    setTimeout(() => {
+      if (statusDot.className === 'dot success') {
+        statusText.textContent = '播放中';
+      }
+    }, 500);
+  }
+}, true);
+
 // ========== 页面加载完成 ==========
 window.addEventListener('load', () => {
   // 恢复上次的状态
   restoreState();
   
   log('页面初始化完成');
-  log('等待用户点击启动按钮...');
+  log('直播间自动加载中...');
   
   // 检测浏览器自动播放策略
   if (navigator.permissions) {
     navigator.permissions.query({name: 'autoplay'}).then(result => {
       log(`自动播放权限: ${result.state}`);
+      
+      // 如果自动播放被拒绝，10秒后显示备用按钮
+      if (result.state === 'denied') {
+        setTimeout(() => {
+          if (!userInteracted) {
+            fallbackHint.classList.add('show');
+            log('显示备用启动按钮');
+          }
+        }, 10000);
+      }
     }).catch(() => {
       log('无法查询自动播放权限');
     });
   }
 });
 
-// ========== 🆕 页面可见性检测 ==========
+// ========== 页面可见性检测 ==========
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     log('⚠️ 页面切换到后台');
@@ -751,25 +746,16 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// ========== 🆕 调试模式切换（按 Ctrl+Shift+D） ==========
-let debugKeyCombo = [];
-document.addEventListener('keydown', (e) => {
-  debugKeyCombo.push(e.key);
-  if (debugKeyCombo.length > 3) debugKeyCombo.shift();
-  
-  // Ctrl+Shift+D 切换调试模式
-  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-    debugEnabled = !debugEnabled;
-    debugPanel.classList.toggle('show', debugEnabled);
-    log(`调试模式: ${debugEnabled ? '开启' : '关闭'}`);
-  }
-});
-
+// ========== 快捷键提示 ==========
 log('🎮 快捷键提示:');
 log('  • Ctrl/Cmd + Space: 切换折叠/展开');
 log('  • ESC: 快速折叠');
 log('  • 右键播放器: 重置位置');
 log('  • Ctrl+Shift+D: 开启/关闭调试日志');
+log('');
+log('📌 音量设置:');
+log('  • 主画面: 静音');
+log('  • 炫神解说: 有声');
 </script>
 </body>
 </html>
