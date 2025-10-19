@@ -3,13 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <title>S15 原画 + 炫神解说</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;background:#000;color:#eee;height:100vh;display:flex;flex-direction:column;overflow:hidden}
   
-  header{background:#18181b;padding:10px 15px;font-size:14px;display:flex;align-items:center;gap:10px;z-index:10}
-  .live{background:#ff4655;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px}
+  html, body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    position:fixed;
+    -webkit-overflow-scrolling:touch;
+  }
+  
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
+    background:#000;
+    color:#eee;
+    display:flex;
+    flex-direction:column;
+    /* 🆕 移动端安全区域适配 */
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right);
+  }
+  
+  header{
+    background:#18181b;
+    padding:10px 15px;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    z-index:10;
+    flex-wrap:wrap;
+    flex-shrink:0;
+  }
+  
+  .live{
+    background:#ff4655;
+    color:#fff;
+    padding:2px 8px;
+    border-radius:4px;
+    font-weight:700;
+    font-size:12px;
+  }
   
   .status{
     display:flex;
@@ -21,6 +61,7 @@
     border-radius:4px;
     background:rgba(255,255,255,.1);
   }
+  
   .dot{
     width:8px;
     height:8px;
@@ -32,9 +73,8 @@
   .dot.success{background:#0f0;animation:none}
   .dot.error{background:#f00;animation:blink 1s infinite}
   
-  /* 🆕 刷新按钮 */
-  .refresh-btn{
-    margin-left:8px;
+  /* 🆕 按钮样式 */
+  .header-btn{
     padding:4px 10px;
     background:rgba(102,126,234,.3);
     border:1px solid rgba(102,126,234,.5);
@@ -43,13 +83,12 @@
     cursor:pointer;
     font-size:12px;
     transition:all .2s;
+    white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
   }
-  .refresh-btn:hover{
+  .header-btn:hover, .header-btn:active{
     background:rgba(102,126,234,.5);
     transform:scale(1.05);
-  }
-  .refresh-btn:active{
-    transform:scale(0.95);
   }
   
   @keyframes pulse{
@@ -61,14 +100,27 @@
     50%{opacity:.3}
   }
   
-  .box{flex:1;display:flex;gap:0;padding:0;position:relative}
-  iframe{width:100%;height:100%;border:0}
+  .box{
+    flex:1;
+    display:flex;
+    gap:0;
+    padding:0;
+    position:relative;
+    overflow:hidden;
+    min-height:0;
+  }
+  
+  iframe{
+    width:100%;
+    height:100%;
+    border:0;
+  }
   
   /* ========== 智能折叠音频播放器 ========== */
   .audio-widget{
     position:fixed;
-    top:60px;  /* 🆕 默认在header下方 */
-    right:15px;  /* 🆕 默认在右上角 */
+    top:60px;
+    right:15px;
     background:rgba(0,0,0,.95);
     border-radius:10px;
     box-shadow:0 8px 24px rgba(0,0,0,.8), 0 0 0 1px rgba(102,126,234,.3);
@@ -78,6 +130,7 @@
     backdrop-filter:blur(10px);
     transition:width .3s cubic-bezier(0.4, 0, 0.2, 1), 
                height .3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color:transparent;
   }
   
   .audio-widget.collapsed{
@@ -87,7 +140,7 @@
   
   .audio-widget.expanded{
     width:320px !important;
-    height:260px !important; /* 🆕 增加高度以容纳刷新按钮 */
+    height:260px !important;
   }
   
   /* 标题栏：可拖动区域 */
@@ -100,6 +153,7 @@
     border-bottom:1px solid rgba(255,255,255,.1);
     cursor:move;
     min-height:40px;
+    touch-action:none;
   }
   
   .audio-header:hover{
@@ -136,7 +190,7 @@
     background:rgba(255,255,255,.1);
   }
   
-  .audio-toggle:hover{
+  .audio-toggle:hover, .audio-toggle:active{
     background:rgba(255,255,255,.2);
     transform:scale(1.1);
   }
@@ -164,7 +218,7 @@
     pointer-events:none;
   }
   
-  /* 🆕 刷新按钮容器 */
+  /* 刷新按钮容器 */
   .audio-controls{
     padding:10px 12px;
     display:flex;
@@ -191,9 +245,10 @@
     font-size:12px;
     text-align:center;
     transition:all .2s;
+    -webkit-tap-highlight-color:transparent;
   }
   
-  .control-btn:hover{
+  .control-btn:hover, .control-btn:active{
     background:rgba(102,126,234,.4);
     border-color:rgba(102,126,234,.6);
     transform:translateY(-2px);
@@ -203,7 +258,7 @@
     transform:translateY(0);
   }
   
-  /* 🔧 拖动时的视觉反馈 */
+  /* 拖动时的视觉反馈 */
   .audio-widget.dragging{
     opacity:.9;
     box-shadow:0 12px 40px rgba(102,126,234,.5);
@@ -256,6 +311,168 @@
     50%{transform:translateX(-50%) translateY(-5px)}
   }
 
+  /* ========== 🆕 使用说明弹窗 ========== */
+  .modal-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,.85);
+    z-index:9999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+  }
+  
+  .modal-overlay.show{
+    display:flex;
+  }
+  
+  .modal{
+    background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius:16px;
+    max-width:500px;
+    width:100%;
+    max-height:80vh;
+    overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    border:1px solid rgba(102,126,234,.3);
+    animation:modalSlideIn .3s ease-out;
+  }
+  
+  @keyframes modalSlideIn{
+    from{
+      opacity:0;
+      transform:translateY(-30px) scale(0.95);
+    }
+    to{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+  }
+  
+  .modal-header{
+    padding:20px;
+    background:linear-gradient(135deg, rgba(102,126,234,.3) 0%, rgba(118,75,162,.3) 100%);
+    border-bottom:1px solid rgba(255,255,255,.1);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  
+  .modal-title{
+    font-size:18px;
+    font-weight:700;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  
+  .modal-close{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:rgba(255,255,255,.1);
+    border:none;
+    color:#fff;
+    font-size:20px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .2s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  
+  .modal-close:hover, .modal-close:active{
+    background:rgba(255,255,255,.2);
+    transform:rotate(90deg);
+  }
+  
+  .modal-body{
+    padding:20px;
+    color:#eee;
+    line-height:1.6;
+  }
+  
+  .step{
+    margin-bottom:20px;
+    padding:15px;
+    background:rgba(102,126,234,.1);
+    border-left:4px solid #667eea;
+    border-radius:8px;
+  }
+  
+  .step-number{
+    display:inline-block;
+    width:28px;
+    height:28px;
+    background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color:#fff;
+    border-radius:50%;
+    text-align:center;
+    line-height:28px;
+    font-weight:700;
+    margin-right:10px;
+    font-size:14px;
+  }
+  
+  .step-title{
+    font-weight:600;
+    color:#667eea;
+    margin-bottom:8px;
+    font-size:15px;
+  }
+  
+  .step-desc{
+    font-size:14px;
+    color:#ccc;
+    margin-left:38px;
+  }
+  
+  .tips{
+    background:rgba(255,193,7,.15);
+    border-left:4px solid #ffc107;
+    padding:12px 15px;
+    border-radius:8px;
+    margin-top:15px;
+  }
+  
+  .tips-title{
+    font-weight:600;
+    color:#ffc107;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  
+  .tips-list{
+    font-size:13px;
+    color:#ccc;
+    margin-left:20px;
+  }
+  
+  .tips-list li{
+    margin:5px 0;
+  }
+  
+  .keyboard{
+    display:inline-block;
+    padding:2px 6px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:4px;
+    font-size:12px;
+    font-family:monospace;
+    color:#667eea;
+  }
+
   /* 调试日志 */
   .debug{
     position:fixed;
@@ -277,14 +494,135 @@
   .debug.show{display:block}
   .debug div{margin:2px 0}
   
-  /* 响应式适配 */
+  /* ========== 🆕 移动端适配 ========== */
   @media (max-width: 768px) {
-    .audio-widget.expanded{
-      width:280px !important;
-      height:240px !important;
+    header{
+      font-size:12px;
+      padding:8px 10px;
+      gap:6px;
     }
+    
+    .status{
+      font-size:11px;
+      padding:3px 8px;
+    }
+    
+    .header-btn{
+      font-size:11px;
+      padding:3px 8px;
+    }
+    
+    .audio-widget{
+      /* 🆕 移动端默认在底部 */
+      top:auto !important;
+      bottom:80px !important;
+      right:10px !important;
+      left:auto !important;
+    }
+    
+    .audio-widget.collapsed{
+      width:160px !important;
+      height:36px !important;
+    }
+    
+    .audio-widget.expanded{
+      width:calc(100vw - 20px) !important;
+      max-width:350px !important;
+      height:240px !important;
+      right:10px !important;
+      bottom:80px !important;
+    }
+    
+    .audio-header{
+      padding:8px 10px;
+      min-height:36px;
+    }
+    
+    .audio-title{
+      font-size:12px;
+      gap:6px;
+    }
+    
+    .audio-icon{
+      font-size:14px;
+    }
+    
+    .audio-toggle{
+      padding:3px 6px;
+      font-size:12px;
+    }
+    
     .audio-player{
       height:160px;
+    }
+    
+    .audio-controls{
+      padding:8px 10px;
+    }
+    
+    .control-btn{
+      padding:6px;
+      font-size:11px;
+    }
+    
+    .modal{
+      max-width:calc(100vw - 30px);
+      margin:15px;
+    }
+    
+    .modal-header{
+      padding:15px;
+    }
+    
+    .modal-title{
+      font-size:16px;
+    }
+    
+    .modal-body{
+      padding:15px;
+    }
+    
+    .step{
+      padding:12px;
+      margin-bottom:15px;
+    }
+    
+    .step-title{
+      font-size:14px;
+    }
+    
+    .step-desc{
+      font-size:13px;
+    }
+    
+    /* 🆕 移动端底部留出空间 */
+    .box{
+      padding-bottom:10px;
+    }
+    
+    /* 🆕 移动端隐藏调试面板 */
+    .debug{
+      display:none !important;
+    }
+  }
+  
+  /* 🆕 横屏模式 */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .audio-widget.expanded{
+      height:200px !important;
+    }
+    
+    .audio-player{
+      height:130px;
+    }
+  }
+  
+  /* 🆕 安全区域底部适配（iPhone X+ 等） */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+      .audio-widget{
+        bottom:calc(80px + env(safe-area-inset-bottom)) !important;
+      }
     }
   }
 </style>
@@ -300,12 +638,15 @@
     <span id="statusText">播放中</span>
   </div>
   
-  <!-- 🆕 主画面刷新按钮 -->
-  <button class="refresh-btn" id="refreshMain" title="刷新主画面">🔄 主画面</button>
+  <!-- 🆕 使用说明按钮 -->
+  <button class="header-btn" id="helpBtn">📖 使用说明</button>
+  
+  <!-- 主画面刷新按钮 -->
+  <button class="header-btn" id="refreshMain" title="刷新主画面">🔄 主画面</button>
 </header>
 
 <section class="box">
-  <!-- 🔧 官方画面（静音） -->
+  <!-- 官方画面（静音） -->
   <iframe id="video"
           src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1&muted=1"
           sandbox="allow-scripts allow-same-origin allow-presentation"
@@ -328,7 +669,7 @@
     <span class="audio-toggle" id="audioToggle">▲</span>
   </div>
   
-  <!-- 🔧 播放器区域（有声音，不静音） -->
+  <!-- 播放器区域（有声音，不静音） -->
   <div class="audio-player">
     <iframe id="audio"
             src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1"
@@ -339,9 +680,116 @@
     </iframe>
   </div>
   
-  <!-- 🆕 控制按钮 -->
+  <!-- 控制按钮 -->
   <div class="audio-controls">
     <div class="control-btn" id="refreshAudio">🔄 刷新解说</div>
+  </div>
+</div>
+
+<!-- ========== 🆕 使用说明弹窗 ========== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span>📖</span>
+        <span>使用说明</span>
+      </div>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">1</span>
+          观看双视角直播
+        </div>
+        <div class="step-desc">
+          • 大屏幕：显示官方画面（无声音）<br>
+          • 小窗口：播放炫神解说（有声音）
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-title">
+                <div class="step">
+        <div class="step-title">
+          <span class="step-number">1</span>
+          观看双视角直播
+        </div>
+        <div class="step-desc">
+          • 大屏幕：显示官方画面（无声音）<br>
+          • 小窗口：播放炫神解说（有声音）
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">2</span>
+          展开/折叠小窗口
+        </div>
+        <div class="step-desc">
+          点击右上角小窗口的 <strong>▲</strong> 按钮，可以展开或折叠解说播放器。
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">3</span>
+          移动小窗口位置
+        </div>
+        <div class="step-desc">
+          <strong>电脑端：</strong>按住标题栏拖动即可移动位置<br>
+          <strong>手机端：</strong>长按标题栏后拖动调整位置
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">4</span>
+          刷新播放器
+        </div>
+        <div class="step-desc">
+          • 如果画面卡顿，点击顶部 <strong>🔄 主画面</strong> 刷新<br>
+          • 如果解说无声，展开小窗口点击 <strong>🔄 刷新解说</strong>
+        </div>
+      </div>
+      
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">5</span>
+          重置窗口位置
+        </div>
+        <div class="step-desc">
+          <strong>电脑端：</strong>右键点击小窗口可重置到默认位置<br>
+          <strong>手机端：</strong>长按小窗口2秒可重置位置
+        </div>
+      </div>
+      
+      <div class="tips">
+        <div class="tips-title">
+          💡 快捷键提示（仅电脑端）
+        </div>
+        <ul class="tips-list">
+          <li><span class="keyboard">Ctrl/Cmd</span> + <span class="keyboard">Space</span> 切换折叠/展开</li>
+          <li><span class="keyboard">ESC</span> 快速折叠小窗口</li>
+          <li><span class="keyboard">Ctrl</span> + <span class="keyboard">R</span> 刷新主画面</li>
+          <li><span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">R</span> 刷新解说</li>
+          <li><span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">D</span> 开启调试模式</li>
+        </ul>
+      </div>
+      
+      <div class="tips" style="border-left-color:#f44336;background:rgba(244,67,54,.15);">
+        <div class="tips-title" style="color:#f44336;">
+          ⚠️ 常见问题
+        </div>
+        <ul class="tips-list">
+          <li><strong>解说没声音？</strong> 展开小窗口，点击刷新解说按钮</li>
+          <li><strong>画面黑屏？</strong> 点击顶部刷新按钮重新加载</li>
+          <li><strong>移动端显示异常？</strong> 尝试横屏观看或刷新页面</li>
+          <li><strong>窗口位置异常？</strong> 右键或长按小窗口重置位置</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -368,6 +816,41 @@ function log(msg) {
 
 log('页面开始加载');
 
+// ========== 🆕 检测设备类型 ==========
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+log(`设备类型: ${isMobile ? '移动端' : '桌面端'}, iOS: ${isIOS}`);
+
+// ========== 🆕 使用说明弹窗 ==========
+const helpBtn = document.getElementById('helpBtn');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalClose = document.getElementById('modalClose');
+
+helpBtn.onclick = () => {
+  modalOverlay.classList.add('show');
+  log('📖 打开使用说明');
+};
+
+modalClose.onclick = () => {
+  modalOverlay.classList.remove('show');
+  log('📖 关闭使用说明');
+};
+
+modalOverlay.onclick = (e) => {
+  if (e.target === modalOverlay) {
+    modalOverlay.classList.remove('show');
+    log('📖 点击背景关闭说明');
+  }
+};
+
+// ESC 键关闭弹窗
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Escape' && modalOverlay.classList.contains('show')) {
+    modalOverlay.classList.remove('show');
+    log('📖 ESC 关闭使用说明');
+  }
+});
+
 // ========== iframe 加载监控 ==========
 const videoFrame = document.getElementById('video');
 const audioFrame = document.getElementById('audio');
@@ -387,10 +870,9 @@ audioFrame.onload = () => {
   audioLoaded = true;
   log('✓ 解说音频加载完成');
   
-  // 🆕 强制确保音频有声音
+  // 强制确保音频有声音
   setTimeout(() => {
     try {
-      // 尝试通过 postMessage 控制音频（如果B站播放器支持）
       audioFrame.contentWindow.postMessage({
         type: 'unmute',
         muted: false
@@ -421,11 +903,21 @@ function checkBothLoaded() {
       
       // 显示提示气泡
       showHintBubble();
+      
+      // 🆕 首次访问显示使用说明
+      const hasVisited = localStorage.getItem('hasVisited');
+      if (!hasVisited) {
+        setTimeout(() => {
+          modalOverlay.classList.add('show');
+          localStorage.setItem('hasVisited', 'true');
+          log('📖 首次访问，显示使用说明');
+        }, 2000);
+      }
     }, 1000);
   }
 }
 
-// ========== 🆕 刷新功能 ==========
+// ========== 刷新功能 ==========
 document.getElementById('refreshMain').onclick = () => {
   log('🔄 刷新主画面...');
   videoFrame.src = videoFrame.src;
@@ -476,8 +968,8 @@ function restoreState() {
     log('默认折叠状态');
   }
   
-  // 恢复位置
-  if (savedPosition) {
+  // 🆕 移动端不恢复位置，使用CSS默认位置
+  if (!isMobile && savedPosition) {
     try {
       const pos = JSON.parse(savedPosition);
       audioWidget.style.left = pos.left;
@@ -486,10 +978,10 @@ function restoreState() {
       audioWidget.style.bottom = 'auto';
       log(`恢复位置: ${pos.left}, ${pos.top}`);
     } catch (e) {
-      log('位置恢复失败，使用默认位置（右上角）');
+      log('位置恢复失败，使用默认位置');
     }
   } else {
-    log('使用默认位置：右上角，header下方');
+    log(isMobile ? '移动端使用默认位置（底部）' : '使用默认位置（右上角）');
   }
 }
 
@@ -527,7 +1019,7 @@ function showHintBubble() {
   }
 }
 
-// ========== 🔧 拖动功能（彻底修复版） ==========
+// ========== 拖动功能（桌面端 + 移动端） ==========
 const audioHeader = document.getElementById('audioHeader');
 let isDragging = false;
 let dragStartX = 0;
@@ -536,9 +1028,11 @@ let widgetStartX = 0;
 let widgetStartY = 0;
 let hasMoved = false;
 
-// 🔧 鼠标按下（只在标题栏上）
+// 🆕 长按重置功能（移动端）
+let longPressTimer = null;
+
+// 桌面端：鼠标拖动
 audioHeader.addEventListener('mousedown', (e) => {
-  // 如果点击的是切换按钮，不触发拖动
   if (e.target.closest('#audioToggle')) {
     return;
   }
@@ -546,11 +1040,9 @@ audioHeader.addEventListener('mousedown', (e) => {
   isDragging = true;
   hasMoved = false;
   
-  // 记录鼠标初始位置
   dragStartX = e.clientX;
   dragStartY = e.clientY;
   
-  // 记录窗口初始位置
   const rect = audioWidget.getBoundingClientRect();
   widgetStartX = rect.left;
   widgetStartY = rect.top;
@@ -561,9 +1053,7 @@ audioHeader.addEventListener('mousedown', (e) => {
   log('🖱️ mousedown - 准备拖动');
 });
 
-// 🔧 鼠标移动（全局监听）
 document.addEventListener('mousemove', (e) => {
-  // 🆕 只有在 isDragging === true 时才处理
   if (!isDragging) {
     return;
   }
@@ -571,7 +1061,6 @@ document.addEventListener('mousemove', (e) => {
   const deltaX = e.clientX - dragStartX;
   const deltaY = e.clientY - dragStartY;
   
-  // 移动超过5px才算真正拖动
   if (!hasMoved && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
     hasMoved = true;
     log('🖱️ 开始真正拖动');
@@ -581,32 +1070,28 @@ document.addEventListener('mousemove', (e) => {
     let newLeft = widgetStartX + deltaX;
     let newTop = widgetStartY + deltaY;
     
-    // 边界限制
     const maxX = window.innerWidth - audioWidget.offsetWidth;
     const maxY = window.innerHeight - audioWidget.offsetHeight;
     
     newLeft = Math.max(0, Math.min(newLeft, maxX));
     newTop = Math.max(0, Math.min(newTop, maxY));
     
-        audioWidget.style.left = newLeft + 'px';
+    audioWidget.style.left = newLeft + 'px';
     audioWidget.style.top = newTop + 'px';
     audioWidget.style.right = 'auto';
     audioWidget.style.bottom = 'auto';
   }
 });
 
-// 🔧 鼠标松开（全局监听）
 document.addEventListener('mouseup', (e) => {
   if (!isDragging) {
     return;
   }
   
-  // 🆕 立即重置拖动状态
   isDragging = false;
   audioWidget.classList.remove('dragging');
   
-  if (hasMoved) {
-    // 保存位置
+  if (hasMoved && !isMobile) {
     const position = {
       left: audioWidget.style.left,
       top: audioWidget.style.top
@@ -620,7 +1105,6 @@ document.addEventListener('mouseup', (e) => {
   hasMoved = false;
 });
 
-// 🔧 鼠标离开窗口时重置状态
 document.addEventListener('mouseleave', () => {
   if (isDragging) {
     isDragging = false;
@@ -630,53 +1114,58 @@ document.addEventListener('mouseleave', () => {
   }
 });
 
-// 🆕 禁用拖动区域的文本选择
-audioHeader.addEventListener('selectstart', (e) => {
-  if (isDragging) {
-    e.preventDefault();
-  }
-});
-
-// ========== 触摸设备支持 ==========
-let touchStartX = 0;
-let touchStartY = 0;
-let touchWidgetStartX = 0;
-let touchWidgetStartY = 0;
-let touchHasMoved = false;
-
+// 🆕 移动端：触摸拖动
 audioHeader.addEventListener('touchstart', (e) => {
   if (e.target.closest('#audioToggle')) return;
   
   const touch = e.touches[0];
   isDragging = true;
-  touchHasMoved = false;
+  hasMoved = false;
   
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
+  dragStartX = touch.clientX;
+  dragStartY = touch.clientY;
   
   const rect = audioWidget.getBoundingClientRect();
-  touchWidgetStartX = rect.left;
-  touchWidgetStartY = rect.top;
+  widgetStartX = rect.left;
+  widgetStartY = rect.top;
   
   audioWidget.classList.add('dragging');
-  e.preventDefault();
+  
+  // 🆕 长按2秒重置位置
+  longPressTimer = setTimeout(() => {
+    if (!hasMoved) {
+      resetPosition();
+      isDragging = false;
+      audioWidget.classList.remove('dragging');
+      
+      // 震动反馈（如果支持）
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      log('📱 长按重置位置');
+    }
+  }, 2000);
+  
   log('📱 touchstart - 触摸拖动开始');
-});
+}, { passive: false });
 
 document.addEventListener('touchmove', (e) => {
   if (!isDragging) return;
   
   const touch = e.touches[0];
-  const deltaX = touch.clientX - touchStartX;
-  const deltaY = touch.clientY - touchStartY;
+  const deltaX = touch.clientX - dragStartX;
+  const deltaY = touch.clientY - dragStartY;
   
-  if (!touchHasMoved && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
-    touchHasMoved = true;
+  if (!hasMoved && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+    hasMoved = true;
+    clearTimeout(longPressTimer);
+    log('📱 开始移动，取消长按');
   }
   
-  if (touchHasMoved) {
-    let newLeft = touchWidgetStartX + deltaX;
-    let newTop = touchWidgetStartY + deltaY;
+  if (hasMoved) {
+    let newLeft = widgetStartX + deltaX;
+    let newTop = widgetStartY + deltaY;
     
     const maxX = window.innerWidth - audioWidget.offsetWidth;
     const maxY = window.innerHeight - audioWidget.offsetHeight;
@@ -688,16 +1177,20 @@ document.addEventListener('touchmove', (e) => {
     audioWidget.style.top = newTop + 'px';
     audioWidget.style.right = 'auto';
     audioWidget.style.bottom = 'auto';
+    
+    e.preventDefault();
   }
 }, { passive: false });
 
 document.addEventListener('touchend', () => {
   if (!isDragging) return;
   
+  clearTimeout(longPressTimer);
+  
   isDragging = false;
   audioWidget.classList.remove('dragging');
   
-  if (touchHasMoved) {
+  if (hasMoved && !isMobile) {
     const position = {
       left: audioWidget.style.left,
       top: audioWidget.style.top
@@ -706,85 +1199,31 @@ document.addEventListener('touchend', () => {
     log('📱 触摸拖动结束，保存位置');
   }
   
-  touchHasMoved = false;
+  hasMoved = false;
 });
 
 document.addEventListener('touchcancel', () => {
   if (isDragging) {
+    clearTimeout(longPressTimer);
     isDragging = false;
-    touchHasMoved = false;
+    hasMoved = false;
     audioWidget.classList.remove('dragging');
     log('📱 触摸取消');
   }
 });
 
-// ========== 窗口大小调整时的边界检查 ==========
-window.addEventListener('resize', () => {
-  const rect = audioWidget.getBoundingClientRect();
-  
-  if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
-    audioWidget.style.left = 'auto';
-    audioWidget.style.top = '60px';
-    audioWidget.style.right = '15px';
-    audioWidget.style.bottom = 'auto';
-    
-    localStorage.removeItem(STORAGE_KEY_POSITION);
-    log('窗口调整，重置位置到右上角');
-  }
-});
-
-// ========== 快捷键 ==========
-document.addEventListener('keydown', (e) => {
-  // 按 Space 键切换折叠/展开（需要 Ctrl 或 Cmd 修饰键，避免误触）
-  if ((e.ctrlKey || e.metaKey) && e.code === 'Space') {
-    e.preventDefault();
-    audioToggle.click();
-    log('⌨️ 快捷键切换折叠状态');
-  }
-  
-  // 按 ESC 键快速折叠
-  if (e.code === 'Escape' && !audioWidget.classList.contains('collapsed')) {
-    e.preventDefault();
-    audioToggle.click();
-    log('⌨️ ESC 快速折叠');
-  }
-  
-  // Ctrl+Shift+D 切换调试模式
-  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-    e.preventDefault();
-    debugEnabled = !debugEnabled;
-    debugPanel.classList.toggle('show', debugEnabled);
-    log(`🐛 调试模式: ${debugEnabled ? '开启' : '关闭'}`);
-  }
-  
-  // 🆕 Ctrl+R 刷新主画面
-  if (e.ctrlKey && e.key === 'r') {
-    e.preventDefault();
-    document.getElementById('refreshMain').click();
-  }
-  
-  // 🆕 Ctrl+Shift+R 刷新解说
-  if (e.ctrlKey && e.shiftKey && e.key === 'R') {
-    e.preventDefault();
-    document.getElementById('refreshAudio').click();
-  }
-});
-
-// ========== 右键菜单（快捷操作） ==========
-audioWidget.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-  
-  // 右键点击：重置位置到右上角
-  audioWidget.style.left = 'auto';
-  audioWidget.style.top = '60px';
-  audioWidget.style.right = '15px';
-  audioWidget.style.bottom = 'auto';
+// ========== 重置位置函数 ==========
+function resetPosition() {
+  audioWidget.style.left = '';
+  audioWidget.style.top = '';
+  audioWidget.style.right = '';
+  audioWidget.style.bottom = '';
   
   localStorage.removeItem(STORAGE_KEY_POSITION);
   
-  log('🖱️ 右键重置位置到右上角');
+  log(isMobile ? '📱 位置已重置到底部' : '🖱️ 位置已重置到右上角');
   
-  // 短暂显示提示
+  // 显示提示
   const originalText = hintBubble.textContent;
   hintBubble.textContent = '✓ 位置已重置';
   hintBubble.classList.add('show');
@@ -793,11 +1232,65 @@ audioWidget.addEventListener('contextmenu', (e) => {
     hintBubble.textContent = originalText;
     hintBubble.classList.remove('show');
   }, 2000);
+}
+
+// ========== 窗口大小调整 ==========
+window.addEventListener('resize', () => {
+  const rect = audioWidget.getBoundingClientRect();
+  
+  if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+    resetPosition();
+    log('窗口调整，重置位置');
+  }
 });
 
-// ========== 🆕 监听来自 iframe 的消息 ==========
+// ========== 快捷键（仅桌面端） ==========
+if (!isMobile) {
+  document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + Space 切换折叠
+    if ((e.ctrlKey || e.metaKey) && e.code === 'Space') {
+      e.preventDefault();
+      audioToggle.click();
+      log('⌨️ 快捷键切换折叠状态');
+    }
+    
+    // ESC 快速折叠
+    if (e.code === 'Escape' && !audioWidget.classList.contains('collapsed') && !modalOverlay.classList.contains('show')) {
+      e.preventDefault();
+      audioToggle.click();
+      log('⌨️ ESC 快速折叠');
+    }
+    
+    // Ctrl+Shift+D 切换调试模式
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      e.preventDefault();
+      debugEnabled = !debugEnabled;
+      debugPanel.classList.toggle('show', debugEnabled);
+      log(`🐛 调试模式: ${debugEnabled ? '开启' : '关闭'}`);
+    }
+    
+    // Ctrl+R 刷新主画面
+    if (e.ctrlKey && e.key === 'r') {
+      e.preventDefault();
+      document.getElementById('refreshMain').click();
+    }
+    
+    // Ctrl+Shift+R 刷新解说
+    if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+      e.preventDefault();
+      document.getElementById('refreshAudio').click();
+    }
+  });
+  
+  // 右键重置位置
+  audioWidget.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    resetPosition();
+  });
+}
+
+// ========== 监听来自 iframe 的消息 ==========
 window.addEventListener('message', (event) => {
-  // 安全检查：只接受来自 bilibili.com 的消息
   if (!event.origin.includes('bilibili.com')) {
     return;
   }
@@ -805,12 +1298,10 @@ window.addEventListener('message', (event) => {
   try {
     const data = event.data;
     
-    // 如果主画面播放器报告静音状态
     if (data.type === 'video_muted' && data.source === 'main') {
       log('📺 主画面确认：已静音');
     }
     
-    // 如果解说播放器报告音量状态
     if (data.type === 'video_muted' && data.source === 'audio') {
       if (data.muted) {
         log('⚠️ 解说播放器意外静音，尝试恢复');
@@ -818,7 +1309,7 @@ window.addEventListener('message', (event) => {
           type: 'unmute',
           muted: false
         }, '*');
-      } else {
+            } else {
         log('🔊 解说播放器确认：有声音');
       }
     }
@@ -832,7 +1323,7 @@ window.addEventListener('load', () => {
   // 恢复上次的状态
   restoreState();
   
-  // 🆕 延迟再次确保音频有声音
+  // 延迟再次确保音频有声音
   setTimeout(() => {
     try {
       audioFrame.contentWindow.postMessage({
@@ -849,15 +1340,24 @@ window.addEventListener('load', () => {
   log('✅ 页面初始化完成');
   log('📺 官方画面：静音模式');
   log('🎙️ 炫神解说：有声音（已强制取消静音）');
-  log('📍 默认位置：屏幕右上角，header下方');
+  log(`📍 默认位置：${isMobile ? '屏幕底部' : '屏幕右上角，header下方'}`);
   log('');
-  log('🎮 快捷键提示:');
-  log('  • Ctrl/Cmd + Space: 切换折叠/展开');
-  log('  • ESC: 快速折叠');
-  log('  • Ctrl + R: 刷新主画面');
-  log('  • Ctrl + Shift + R: 刷新解说画面');
-  log('  • 右键播放器: 重置位置');
-  log('  • Ctrl+Shift+D: 开启/关闭调试日志');
+  
+  if (!isMobile) {
+    log('🎮 快捷键提示:');
+    log('  • Ctrl/Cmd + Space: 切换折叠/展开');
+    log('  • ESC: 快速折叠');
+    log('  • Ctrl + R: 刷新主画面');
+    log('  • Ctrl + Shift + R: 刷新解说画面');
+    log('  • 右键播放器: 重置位置');
+    log('  • Ctrl+Shift+D: 开启/关闭调试日志');
+  } else {
+    log('📱 移动端提示:');
+    log('  • 点击 ▲ 按钮：展开/折叠播放器');
+    log('  • 拖动标题栏：移动窗口位置');
+    log('  • 长按标题栏2秒：重置到默认位置');
+    log('  • 点击使用说明：查看详细操作指南');
+  }
 });
 
 // ========== 页面可见性检测 ==========
@@ -867,7 +1367,7 @@ document.addEventListener('visibilitychange', () => {
   } else {
     log('✓ 页面切换到前台');
     
-    // 🆕 页面重新可见时，再次确保音频有声音
+    // 页面重新可见时，再次确保音频有声音
     setTimeout(() => {
       try {
         audioFrame.contentWindow.postMessage({
@@ -896,7 +1396,7 @@ if (videoLoaded && audioLoaded) {
   clearTimeout(loadTimer);
 }
 
-// ========== 🆕 定期检查音频状态 ==========
+// ========== 定期检查音频状态 ==========
 setInterval(() => {
   if (audioLoaded) {
     try {
@@ -910,30 +1410,260 @@ setInterval(() => {
   }
 }, 30000);
 
-// ========== 🆕 防止拖动时的意外行为 ==========
+// ========== 防止拖动时的意外行为 ==========
 audioWidget.addEventListener('mouseenter', () => {
-  // 如果鼠标进入时没有按下左键，确保不处于拖动状态
   if (!isDragging) {
     audioWidget.classList.remove('dragging');
   }
 });
 
 audioWidget.addEventListener('mouseleave', () => {
-  // 如果鼠标离开且没有在拖动，移除拖动样式
   if (!isDragging) {
     audioWidget.classList.remove('dragging');
   }
 });
 
-// ========== 🆕 全局鼠标按键状态监听（终极修复） ==========
+// ========== 全局鼠标按键状态监听 ==========
 document.addEventListener('mousedown', (e) => {
-  // 如果不是在 audioHeader 上按下，确保 isDragging 为 false
   if (!audioHeader.contains(e.target)) {
     isDragging = false;
     hasMoved = false;
     audioWidget.classList.remove('dragging');
   }
 });
+
+// ========== 🆕 移动端特殊处理 ==========
+if (isMobile) {
+  // 禁止页面滚动
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+  
+  // 禁止双击缩放
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+  
+  // 🆕 iOS Safari 地址栏隐藏处理
+  if (isIOS) {
+    // 等待页面完全加载后调整视口
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        log('📱 iOS: 隐藏地址栏');
+      }, 100);
+    });
+    
+    // 监听屏幕方向变化
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        log('📱 iOS: 屏幕旋转，重新调整');
+      }, 100);
+    });
+  }
+  
+  // 🆕 阻止橡皮筋效果（iOS）
+  let startY = 0;
+  document.addEventListener('touchstart', (e) => {
+    startY = e.touches[0].pageY;
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', (e) => {
+    const y = e.touches[0].pageY;
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    
+    // 在顶部下拉或在底部上拉时阻止默认行为
+    if ((scrollTop <= 0 && y > startY) || 
+        (scrollTop + window.innerHeight >= document.documentElement.scrollHeight && y < startY)) {
+      if (!audioHeader.contains(e.target)) {
+        e.preventDefault();
+      }
+    }
+  }, { passive: false });
+  
+  log('📱 移动端优化已启用');
+}
+
+// ========== 🆕 网络状态监听 ==========
+window.addEventListener('online', () => {
+  log('✅ 网络已连接');
+  statusDot.className = 'dot success';
+  statusText.textContent = '播放中';
+});
+
+window.addEventListener('offline', () => {
+  log('❌ 网络已断开');
+  statusDot.className = 'dot error';
+  statusText.textContent = '网络断开';
+});
+
+// ========== 🆕 电池状态监听（移动端） ==========
+if (isMobile && 'getBattery' in navigator) {
+  navigator.getBattery().then((battery) => {
+    const logBatteryStatus = () => {
+      log(`🔋 电量: ${Math.round(battery.level * 100)}%, 充电中: ${battery.charging}`);
+    };
+    
+    battery.addEventListener('levelchange', logBatteryStatus);
+    battery.addEventListener('chargingchange', logBatteryStatus);
+  }).catch((e) => {
+    log('⚠️ 无法获取电池状态');
+  });
+}
+
+// ========== 🆕 性能监控 ==========
+if ('PerformanceObserver' in window) {
+  try {
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.entryType === 'navigation') {
+          log(`⏱️ 页面加载时间: ${Math.round(entry.loadEventEnd - entry.fetchStart)}ms`);
+        }
+      }
+    });
+    observer.observe({ entryTypes: ['navigation'] });
+  } catch (e) {
+    // 忽略不支持的浏览器
+  }
+}
+
+// ========== 🆕 内存警告（移动端） ==========
+if (isMobile && 'memory' in performance) {
+  setInterval(() => {
+    const memory = performance.memory;
+    const usedPercent = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+    
+    if (usedPercent > 90) {
+      log(`⚠️ 内存使用过高: ${Math.round(usedPercent)}%`);
+    }
+  }, 60000); // 每分钟检查一次
+}
+
+// ========== 🆕 全屏支持 ==========
+if (isMobile) {
+  let isFullscreen = false;
+  
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      }
+      log('📱 进入全屏模式');
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      log('📱 退出全屏模式');
+    }
+  };
+  
+  document.addEventListener('fullscreenchange', () => {
+    isFullscreen = !!document.fullscreenElement;
+  });
+  
+  document.addEventListener('webkitfullscreenchange', () => {
+    isFullscreen = !!document.webkitFullscreenElement;
+  });
+  
+  // 双击视频区域全屏（移动端）
+  const box = document.querySelector('.box');
+  let lastTap = 0;
+  box.addEventListener('touchend', (e) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    
+    if (tapLength < 300 && tapLength > 0) {
+      toggleFullscreen();
+      e.preventDefault();
+    }
+    lastTap = currentTime;
+  });
+}
+
+// ========== 🆕 阻止长按菜单（移动端） ==========
+if (isMobile) {
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  }, { passive: false });
+  
+  // 阻止图片和链接的长按保存
+  document.addEventListener('touchstart', (e) => {
+    if (e.target.tagName === 'IMG' || e.target.tagName === 'A') {
+      e.preventDefault();
+    }
+  }, { passive: false });
+}
+
+// ========== 🆕 唤醒锁（防止屏幕休眠） ==========
+if ('wakeLock' in navigator && isMobile) {
+  let wakeLock = null;
+  
+  const requestWakeLock = async () => {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      log('🔒 屏幕保持唤醒');
+      
+      wakeLock.addEventListener('release', () => {
+        log('🔓 屏幕唤醒已释放');
+      });
+    } catch (err) {
+      log(`⚠️ 无法启用屏幕唤醒: ${err.message}`);
+    }
+  };
+  
+  // 页面可见时请求唤醒锁
+  document.addEventListener('visibilitychange', async () => {
+    if (!document.hidden && wakeLock === null) {
+      await requestWakeLock();
+    }
+  });
+  
+  // 初始请求
+  requestWakeLock();
+}
+
+// ========== 🆕 PWA 安装提示 ==========
+if (isMobile) {
+  let deferredPrompt = null;
+  
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    log('📲 PWA 可安装');
+    
+    // 可以在这里显示自定义的安装提示
+    // 暂时注释掉，避免打扰用户
+    /*
+    setTimeout(() => {
+      if (confirm('是否将此页面添加到主屏幕？')) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            log('📲 用户接受安装');
+          } else {
+            log('📲 用户拒绝安装');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }, 5000);
+    */
+  });
+  
+  window.addEventListener('appinstalled', () => {
+    log('📲 PWA 已安装');
+    deferredPrompt = null;
+  });
+}
 
 log('🎬 脚本初始化完成，等待直播流加载...');
 </script>
