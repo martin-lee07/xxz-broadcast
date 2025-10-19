@@ -49,6 +49,7 @@
     padding:0 16px;
     gap:12px;
     border-right:1px solid #333;
+    flex-shrink:0;
   }
   
   .status-badge{
@@ -76,6 +77,7 @@
     flex:1;
     overflow-x:auto;
     overflow-y:hidden;
+    min-width:0;
   }
   
   .header-center::-webkit-scrollbar{
@@ -89,6 +91,7 @@
     padding:0 16px;
     gap:8px;
     border-left:1px solid #333;
+    flex-shrink:0;
   }
   
   .status-indicator{
@@ -121,20 +124,21 @@
   /* ========== 工具栏按钮 ========== */
   .toolbar-btn{
     height:48px;
-    padding:0 16px;
+    padding:0 14px;
     background:transparent;
     border:none;
     border-right:1px solid #333;
     color:#e0e0e0;
-    font-size:13px;
+    font-size:12px;
     font-family:'Segoe UI',sans-serif;
     cursor:pointer;
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:6px;
     transition:background .15s ease;
     white-space:nowrap;
     -webkit-tap-highlight-color:transparent;
+    flex-shrink:0;
   }
   
   .toolbar-btn:hover{
@@ -160,7 +164,7 @@
   }
   
   .toolbar-btn .icon{
-    font-size:16px;
+    font-size:14px;
     font-weight:400;
   }
   
@@ -180,7 +184,7 @@
     border:0;
   }
   
-  /* ========== 炫神解说折叠面板 ========== */
+  /* ========== 炫神解说折叠面板（电脑端） ========== */
   .audio-panel{
     position:absolute;
     top:0;
@@ -196,25 +200,26 @@
   }
   
   .audio-panel.collapsed{
-    width:200px;
-    height:48px;
+    width:160px;
+    height:36px;
   }
   
   .audio-panel.expanded{
-    width:400px;
-    height:300px;
+    width:320px;
+    height:240px;
   }
   
   /* 面板标题栏 */
   .panel-header{
-    height:48px;
+    height:36px;
     background:#2d2d2d;
     border-bottom:1px solid #333;
     display:flex;
     align-items:center;
-    padding:0 16px;
+    padding:0 12px;
     cursor:pointer;
     user-select:none;
+    flex-shrink:0;
   }
   
   .panel-header:hover{
@@ -223,14 +228,14 @@
   
   .panel-title{
     flex:1;
-    font-size:13px;
+    font-size:12px;
     font-weight:600;
     color:#e0e0e0;
   }
   
   .panel-toggle{
-    width:32px;
-    height:32px;
+    width:24px;
+    height:24px;
     background:transparent;
     border:1px solid #555;
     color:#e0e0e0;
@@ -238,7 +243,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:12px;
+    font-size:10px;
     transition:all .15s ease;
   }
   
@@ -259,6 +264,7 @@
     overflow:hidden;
     opacity:1;
     transition:opacity .2s ease;
+    min-height:0;
   }
   
   .audio-panel.collapsed .panel-content{
@@ -270,23 +276,25 @@
     flex:1;
     background:#000;
     border-bottom:1px solid #333;
+    min-height:0;
   }
   
   .panel-controls{
-    height:48px;
+    height:40px;
     display:flex;
-    padding:8px;
-    gap:8px;
+    padding:6px;
+    gap:6px;
     background:#1f1f1f;
+    flex-shrink:0;
   }
   
   .panel-btn{
     flex:1;
-    height:32px;
+    height:28px;
     background:#0078d4;
     border:1px solid #005a9e;
     color:#fff;
-    font-size:12px;
+    font-size:11px;
     font-family:'Segoe UI',sans-serif;
     cursor:pointer;
     transition:background .15s ease;
@@ -339,6 +347,7 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
+    flex-shrink:0;
   }
   
   .modal-title{
@@ -510,35 +519,45 @@
   
   /* ========== 移动端适配 ========== */
   @media (max-width: 768px) {
+    /* 工具栏紧凑布局 */
     header{
-      height:auto;
-      flex-wrap:wrap;
+      height:40px;
     }
     
     .header-left{
-      padding:8px 12px;
-      height:44px;
+      padding:0 8px;
+      gap:6px;
     }
     
     .status-badge{
-      font-size:10px;
-      padding:3px 8px;
+      font-size:9px;
+      padding:3px 6px;
     }
     
     .title-text{
-      font-size:12px;
-    }
-    
-    .header-center{
-      width:100%;
-      border-top:1px solid #333;
-      height:44px;
+      font-size:11px;
+      max-width:120px;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     
     .toolbar-btn{
-      height:44px;
-      padding:0 12px;
+      height:40px;
+      padding:0 10px;
+      font-size:11px;
+      gap:4px;
+    }
+    
+    .toolbar-btn .icon{
       font-size:12px;
+    }
+    
+    .toolbar-btn .btn-text{
+      display:none; /* 移动端隐藏按钮文字 */
+    }
+    
+    .toolbar-btn[data-show-text] .btn-text{
+      display:inline; /* 重要按钮保留文字 */
     }
     
     .header-right{
@@ -558,17 +577,47 @@
     
     .audio-panel.collapsed{
       width:100%;
-      height:44px;
+      height:40px;
     }
     
     .audio-panel.expanded{
       width:100%;
-      height:60vh;
-      max-height:400px;
+      height:50vh;
+      max-height:320px;
     }
     
     .panel-header{
-      height:44px;
+      height:40px;
+      padding:0 12px;
+    }
+    
+    .panel-title{
+      font-size:11px;
+    }
+    
+    .panel-controls{
+      height:36px;
+      padding:4px;
+    }
+    
+    .panel-btn{
+      height:28px;
+      font-size:10px;
+    }
+    
+    /* 🆕 关键修复：为播放器控制栏留出足够空间 */
+    .box{
+      padding-bottom:120px !important; /* 增加底部留白，确保全屏按钮可见 */
+    }
+    
+    .audio-panel.collapsed ~ .box{
+      padding-bottom:100px !important; /* 折叠时也要留空间 */
+    }
+    
+    /* 🆕 确保iframe不被遮挡 */
+    .box iframe{
+      height:calc(100% + 60px); /* 延伸iframe高度 */
+      margin-bottom:-60px; /* 但保持可视区域 */
     }
     
     .modal{
@@ -587,21 +636,27 @@
     .debug{
       display:none !important;
     }
-    
-    /* 🆕 确保播放器控制栏可见 */
-    .box{
-      padding-bottom:60px; /* 为炫神面板留出空间 */
+  }
+  
+  /* 🆕 移动端横屏优化 */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .audio-panel.expanded{
+      height:70vh;
     }
     
-    .audio-panel.collapsed ~ .box{
-      padding-bottom:44px;
+    .box{
+      padding-bottom:60px !important;
     }
   }
   
-  /* 横屏模式 */
-  @media (max-width: 768px) and (orientation: landscape) {
-    .audio-panel.expanded{
-      height:80vh;
+  /* 🆕 超小屏幕适配 */
+  @media (max-width: 360px) {
+    .title-text{
+      max-width:80px;
+    }
+    
+    .toolbar-btn{
+      padding:0 8px;
     }
   }
 </style>
@@ -612,28 +667,28 @@
 <header>
   <div class="header-left">
     <span class="status-badge">LIVE</span>
-    <span class="title-text">S15 官方画面 + Last炫神解说</span>
+    <span class="title-text">S15 官方 + 炫神</span>
   </div>
   
   <div class="header-center">
-    <button class="toolbar-btn" id="toggleAudioBtn">
+    <button class="toolbar-btn" id="toggleAudioBtn" data-show-text>
       <span class="icon">▲</span>
-      <span>炫神解说</span>
+      <span class="btn-text">炫神</span>
     </button>
     
     <button class="toolbar-btn" id="refreshAudioBtn">
       <span class="icon">⟳</span>
-      <span>刷新解说</span>
+      <span class="btn-text">刷新解说</span>
     </button>
     
     <button class="toolbar-btn" id="refreshMainBtn">
       <span class="icon">⟳</span>
-      <span>刷新主画面</span>
+      <span class="btn-text">刷新主画面</span>
     </button>
     
     <button class="toolbar-btn" id="helpBtn">
       <span class="icon">?</span>
-      <span>使用说明</span>
+      <span class="btn-text">说明</span>
     </button>
   </div>
   
@@ -647,33 +702,36 @@
 
 <!-- ========== 主视频区域 ========== -->
 <section class="box">
-  <!-- 官方画面（静音） -->
+  <!-- 🆕 官方画面（静音 + 自动播放） -->
   <iframe id="videoFrame"
-          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1&muted=1"
+          src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=7734200&quality=1&muted=1&autoplay=1"
           sandbox="allow-scripts allow-same-origin allow-presentation"
           allow="autoplay *; encrypted-media *; fullscreen *"
-          referrerpolicy="no-referrer">
+          referrerpolicy="no-referrer"
+          allowfullscreen>
   </iframe>
   
   <!-- ========== 炫神解说折叠面板 ========== -->
   <div class="audio-panel collapsed" id="audioPanel">
     <div class="panel-header" id="panelHeader">
-      <div class="panel-title">炫神解说直播间</div>
+      <div class="panel-title">炫神解说</div>
       <button class="panel-toggle" id="panelToggle">▲</button>
     </div>
     
     <div class="panel-content">
       <div class="panel-player">
+        <!-- 🆕 炫神解说（有声音 + 自动播放） -->
         <iframe id="audioFrame"
-                src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1"
+                src="https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=84074&quality=1&autoplay=1"
                 sandbox="allow-scripts allow-same-origin allow-presentation"
                 allow="autoplay *; encrypted-media *"
                 referrerpolicy="no-referrer"
+                allowfullscreen
                 style="width:100%;height:100%;border:0">
         </iframe>
       </div>
       
-      <div class="panel-controls">
+            <div class="panel-controls">
         <button class="panel-btn" id="refreshAudioBtn2">刷新解说</button>
       </div>
     </div>
@@ -695,7 +753,7 @@
           <div class="step-title">观看双视角直播</div>
         </div>
         <div class="step-desc">
-          大屏幕显示官方画面（无声音），右上角小窗口播放炫神解说（有声音）。<br>
+          大屏幕显示官方画面（无声音），解说窗口播放炫神解说（有声音）。<br>
           <strong>建议：进入后直接点击右下角全屏按钮观赏，体验最佳。</strong>
         </div>
       </div>
@@ -706,7 +764,7 @@
           <div class="step-title">展开/折叠解说窗口</div>
         </div>
         <div class="step-desc">
-          点击顶部工具栏的 <strong>"炫神解说"</strong> 按钮，或点击右上角解说窗口的 <strong>▲</strong> 按钮，可以展开或折叠解说播放器。
+          点击顶部工具栏的 <strong>"炫神"</strong> 按钮，或点击解说窗口的 <strong>▲</strong> 按钮，可以展开或折叠解说播放器。
         </div>
       </div>
       
@@ -716,19 +774,19 @@
           <div class="step-title">刷新播放器</div>
         </div>
         <div class="step-desc">
-          • 如果主画面卡顿或黑屏，点击顶部 <strong>"刷新主画面"</strong> 按钮<br>
-          • 如果解说无声音或卡顿，点击顶部 <strong>"刷新解说"</strong> 按钮
+          • 主画面卡顿：点击 <strong>"刷新主画面"</strong> 按钮<br>
+          • 解说无声或卡顿：点击 <strong>"刷新解说"</strong> 按钮
         </div>
       </div>
       
-            <div class="step">
+      <div class="step">
         <div class="step-header">
           <div class="step-number">4</div>
           <div class="step-title">全屏观看</div>
         </div>
         <div class="step-desc">
           <strong>电脑端：</strong>点击播放器右下角的全屏按钮<br>
-          <strong>手机端：</strong>建议横屏观看，竖屏时需要先展开解说窗口才能看到全屏按钮
+          <strong>手机端：</strong>竖屏时向下滚动可看到全屏按钮，或横屏观看获得最佳体验
         </div>
       </div>
       
@@ -761,7 +819,7 @@
           <li><strong>解说没声音？</strong> 点击"刷新解说"按钮</li>
           <li><strong>画面黑屏？</strong> 点击"刷新主画面"按钮</li>
           <li><strong>画面卡顿？</strong> 检查网络连接，尝试刷新页面</li>
-          <li><strong>移动端控制栏被遮挡？</strong> 横屏观看或折叠解说窗口</li>
+          <li><strong>移动端控制栏被遮挡？</strong> 向下滚动或横屏观看</li>
         </ul>
       </div>
     </div>
@@ -818,26 +876,56 @@ let audioLoaded = false;
 
 videoFrame.onload = () => {
   videoLoaded = true;
-  log('官方画面加载完成（静音）');
+  log('官方画面加载完成（静音+自动播放）');
+  
+  // 🆕 强制静音主画面
+  setTimeout(() => {
+    try {
+      videoFrame.contentWindow.postMessage({
+        type: 'mute',
+        muted: true
+      }, '*');
+      log('强制静音主画面');
+    } catch (e) {
+      log('无法控制主画面音频: ' + e.message);
+    }
+  }, 500);
+  
   checkBothLoaded();
 };
 
 audioFrame.onload = () => {
   audioLoaded = true;
-  log('解说音频加载完成');
+  log('解说音频加载完成（有声音+自动播放）');
   
-  // 确保音频有声音
+  // 🆕 强制取消静音解说
   setTimeout(() => {
     try {
       audioFrame.contentWindow.postMessage({
         type: 'unmute',
-        muted: false
+        muted: false,
+        volume: 1.0
       }, '*');
-      log('已发送取消静音指令到解说播放器');
+      log('强制取消静音解说播放器');
     } catch (e) {
-      log('无法直接控制音频: ' + e.message);
+      log('无法控制解说音频: ' + e.message);
     }
-  }, 1000);
+  }, 500);
+  
+  // 🆕 移动端额外处理：尝试自动播放
+  if (isMobile) {
+    setTimeout(() => {
+      try {
+        audioFrame.contentWindow.postMessage({
+          type: 'play',
+          autoplay: true
+        }, '*');
+        log('移动端：强制播放解说');
+      } catch (e) {
+        log('移动端：无法强制播放');
+      }
+    }, 1000);
+  }
   
   checkBothLoaded();
 };
@@ -937,29 +1025,61 @@ if (panelHeader) {
 // ========== 刷新功能 ==========
 function refreshMain() {
   log('刷新主画面');
-  videoFrame.src = videoFrame.src;
+  const currentSrc = videoFrame.src;
+  videoFrame.src = '';
+  setTimeout(() => {
+    videoFrame.src = currentSrc;
+  }, 100);
+  
   if (statusDot) {
     statusDot.className = 'status-dot loading';
   }
   if (statusText) {
     statusText.textContent = '刷新中';
   }
+  
+  // 刷新后重新静音
+  setTimeout(() => {
+    try {
+      videoFrame.contentWindow.postMessage({
+        type: 'mute',
+        muted: true
+      }, '*');
+      log('刷新后重新静音主画面');
+    } catch (e) {
+      log('刷新后无法控制主画面音频');
+    }
+  }, 1500);
 }
 
 function refreshAudio() {
   log('刷新解说画面');
-  audioFrame.src = audioFrame.src;
+  const currentSrc = audioFrame.src;
+  audioFrame.src = '';
+  setTimeout(() => {
+    audioFrame.src = currentSrc;
+  }, 100);
   
-  // 刷新后再次确保有声音
+  // 刷新后重新取消静音
   setTimeout(() => {
     try {
       audioFrame.contentWindow.postMessage({
         type: 'unmute',
-        muted: false
+        muted: false,
+        volume: 1.0
       }, '*');
-      log('刷新后重新发送取消静音指令');
+      log('刷新后重新取消静音解说');
+      
+      // 🆕 移动端强制播放
+      if (isMobile) {
+        audioFrame.contentWindow.postMessage({
+          type: 'play',
+          autoplay: true
+        }, '*');
+        log('移动端：刷新后强制播放解说');
+      }
     } catch (e) {
-      log('刷新后无法控制音频');
+      log('刷新后无法控制解说音频');
     }
   }, 1500);
 }
@@ -1067,6 +1187,27 @@ window.addEventListener('message', (event) => {
         log('解说播放器确认：有声音');
       }
     }
+    
+    // 🆕 监听播放状态
+    if (data.type === 'player_state') {
+      log(`播放器状态: ${data.state}, 来源: ${data.source}`);
+      
+      // 如果主画面没有自动播放，尝试手动播放
+      if (data.source === 'main' && data.state === 'paused') {
+        videoFrame.contentWindow.postMessage({
+          type: 'play'
+        }, '*');
+        log('主画面暂停，尝试播放');
+      }
+      
+      // 如果解说没有自动播放，尝试手动播放
+      if (data.source === 'audio' && data.state === 'paused') {
+        audioFrame.contentWindow.postMessage({
+          type: 'play'
+        }, '*');
+        log('解说暂停，尝试播放');
+      }
+    }
   } catch (e) {
     // 忽略解析错误
   }
@@ -1077,28 +1218,45 @@ window.addEventListener('load', () => {
   // 恢复上次的状态
   restoreState();
   
-  // 延迟再次确保音频有声音
+  // 🆕 延迟确保音频状态正确
   setTimeout(() => {
     try {
+      // 主画面静音
+      videoFrame.contentWindow.postMessage({
+        type: 'mute',
+        muted: true
+      }, '*');
+      
+      // 解说有声
       audioFrame.contentWindow.postMessage({
         type: 'unmute',
         muted: false,
         volume: 1.0
       }, '*');
-      log('页面加载完成后再次确保解说有声音');
+      
+      log('页面加载完成后确保音频状态正确');
+      
+      // 🆕 移动端自动播放处理
+      if (isMobile) {
+        setTimeout(() => {
+          videoFrame.contentWindow.postMessage({ type: 'play' }, '*');
+          audioFrame.contentWindow.postMessage({ type: 'play' }, '*');
+          log('移动端：尝试自动播放两个播放器');
+        }, 500);
+      }
     } catch (e) {
       log('无法发送音频控制消息');
     }
   }, 2000);
   
   log('页面初始化完成');
-  log('官方画面：静音模式');
-  log('炫神解说：有声音（已强制取消静音）');
+  log('官方画面：静音模式 + 自动播放');
+  log('炫神解说：有声音 + 自动播放');
   
   if (!isMobile) {
     log('快捷键已启用');
   } else {
-    log('移动端模式');
+    log('移动端模式 - 已优化控制栏显示');
   }
 });
 
@@ -1109,14 +1267,27 @@ document.addEventListener('visibilitychange', () => {
   } else {
     log('页面切换到前台');
     
-    // 页面重新可见时，再次确保音频有声音
+    // 页面重新可见时，确保音频状态正确
     setTimeout(() => {
       try {
+        videoFrame.contentWindow.postMessage({
+          type: 'mute',
+          muted: true
+        }, '*');
+        
         audioFrame.contentWindow.postMessage({
           type: 'unmute',
           muted: false
         }, '*');
-        log('页面恢复可见，重新确保解说有声音');
+        
+        log('页面恢复可见，重新确保音频状态');
+        
+        // 🆕 移动端重新播放
+        if (isMobile) {
+          videoFrame.contentWindow.postMessage({ type: 'play' }, '*');
+          audioFrame.contentWindow.postMessage({ type: 'play' }, '*');
+          log('移动端：页面恢复，重新播放');
+        }
       } catch (e) {
         log('无法重新控制音频');
       }
@@ -1143,10 +1314,18 @@ if (videoLoaded && audioLoaded) {
 
 // ========== 定期检查音频状态 ==========
 setInterval(() => {
-  if (audioLoaded) {
+  if (videoLoaded && audioLoaded) {
     try {
+      // 确保主画面静音
+      videoFrame.contentWindow.postMessage({
+        type: 'check_muted',
+        shouldBeMuted: true
+      }, '*');
+      
+      // 确保解说有声
       audioFrame.contentWindow.postMessage({
-        type: 'check_muted'
+        type: 'check_muted',
+        shouldBeMuted: false
       }, '*');
     } catch (e) {
       // 忽略错误
@@ -1181,13 +1360,13 @@ if (isMobile) {
     
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
-        window.scrollTo(0, 1);
+               window.scrollTo(0, 1);
         log('iOS: 屏幕旋转，重新调整');
       }, 100);
     });
   }
   
-  // 阻止橡皮筋效果
+  // 🆕 阻止橡皮筋效果（iOS）
   let startY = 0;
   document.addEventListener('touchstart', (e) => {
     startY = e.touches[0].pageY;
@@ -1197,6 +1376,7 @@ if (isMobile) {
     const y = e.touches[0].pageY;
     const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
     
+    // 在顶部下拉或在底部上拉时阻止默认行为
     if ((scrollTop <= 0 && y > startY) || 
         (scrollTop + window.innerHeight >= document.documentElement.scrollHeight && y < startY)) {
       if (!e.target.closest('.modal-body')) {
@@ -1209,6 +1389,29 @@ if (isMobile) {
   document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
   }, { passive: false });
+  
+  // 🆕 移动端用户交互后自动播放
+  const enableAutoplay = () => {
+    try {
+      videoFrame.contentWindow.postMessage({
+        type: 'play',
+        muted: true
+      }, '*');
+      
+      audioFrame.contentWindow.postMessage({
+        type: 'play',
+        muted: false
+      }, '*');
+      
+      log('移动端：用户交互后启动播放');
+    } catch (e) {
+      log('移动端：无法启动播放');
+    }
+  };
+  
+  // 监听首次触摸
+  document.addEventListener('touchstart', enableAutoplay, { once: true });
+  document.addEventListener('click', enableAutoplay, { once: true });
   
   log('移动端优化已启用');
 }
@@ -1234,7 +1437,7 @@ window.addEventListener('offline', () => {
   }
 });
 
-// ========== 唤醒锁（防止屏幕休眠） ==========
+// ========== 🆕 唤醒锁（防止屏幕休眠） ==========
 if ('wakeLock' in navigator && isMobile) {
   let wakeLock = null;
   
@@ -1259,6 +1462,258 @@ if ('wakeLock' in navigator && isMobile) {
   
   requestWakeLock();
 }
+
+// ========== 🆕 移动端强制自动播放机制 ==========
+if (isMobile) {
+  // 延迟3秒后检查播放状态
+  setTimeout(() => {
+    log('移动端：3秒后检查播放状态');
+    
+    try {
+      // 发送播放指令
+      videoFrame.contentWindow.postMessage({
+        type: 'play',
+        force: true
+      }, '*');
+      
+      audioFrame.contentWindow.postMessage({
+        type: 'play',
+        force: true
+      }, '*');
+      
+      log('移动端：发送强制播放指令');
+    } catch (e) {
+      log('移动端：无法发送播放指令');
+    }
+  }, 3000);
+  
+  // 每10秒检查一次状态
+  setInterval(() => {
+    try {
+      videoFrame.contentWindow.postMessage({
+        type: 'getState'
+      }, '*');
+      
+      audioFrame.contentWindow.postMessage({
+        type: 'getState'
+      }, '*');
+    } catch (e) {
+      // 忽略错误
+    }
+  }, 10000);
+}
+
+// ========== 🆕 窗口焦点恢复 ==========
+window.addEventListener('focus', () => {
+  log('窗口获得焦点');
+  
+  setTimeout(() => {
+    try {
+      // 确保音频状态正确
+      videoFrame.contentWindow.postMessage({
+        type: 'mute',
+        muted: true
+      }, '*');
+      
+      audioFrame.contentWindow.postMessage({
+        type: 'unmute',
+        muted: false
+      }, '*');
+      
+      log('窗口焦点恢复，重新确保音频状态');
+    } catch (e) {
+      log('无法恢复音频状态');
+    }
+  }, 300);
+});
+
+window.addEventListener('blur', () => {
+  log('窗口失去焦点');
+});
+
+// ========== 🆕 页面卸载前保存状态 ==========
+window.addEventListener('beforeunload', () => {
+  log('页面即将卸载');
+});
+
+// ========== 🆕 性能监控 ==========
+if ('PerformanceObserver' in window && debugEnabled) {
+  try {
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.entryType === 'navigation') {
+          log(`页面加载时间: ${Math.round(entry.loadEventEnd - entry.fetchStart)}ms`);
+        }
+      }
+    });
+    observer.observe({ entryTypes: ['navigation'] });
+  } catch (e) {
+    // 忽略不支持的浏览器
+  }
+}
+
+// ========== 🆕 移动端播放器点击事件优化 ==========
+if (isMobile) {
+  const box = document.querySelector('.box');
+  
+  // 单击主画面区域时，确保解说有声音
+  box.addEventListener('click', (e) => {
+    if (e.target === box || e.target === videoFrame) {
+      try {
+        audioFrame.contentWindow.postMessage({
+          type: 'unmute',
+          muted: false
+        }, '*');
+        log('移动端：点击主画面，确保解说有声');
+      } catch (err) {
+        log('移动端：无法控制解说音频');
+      }
+    }
+  });
+}
+
+// ========== 🆕 自动重试加载失败的流 ==========
+let videoRetryCount = 0;
+let audioRetryCount = 0;
+const MAX_RETRY = 3;
+
+videoFrame.addEventListener('error', () => {
+  if (videoRetryCount < MAX_RETRY) {
+    videoRetryCount++;
+    log(`主画面加载失败，重试 ${videoRetryCount}/${MAX_RETRY}`);
+    
+    setTimeout(() => {
+      videoFrame.src = videoFrame.src;
+    }, 2000 * videoRetryCount);
+  } else {
+    log('主画面加载失败，已达最大重试次数');
+  }
+});
+
+audioFrame.addEventListener('error', () => {
+  if (audioRetryCount < MAX_RETRY) {
+    audioRetryCount++;
+    log(`解说加载失败，重试 ${audioRetryCount}/${MAX_RETRY}`);
+    
+    setTimeout(() => {
+      audioFrame.src = audioFrame.src;
+    }, 2000 * audioRetryCount);
+  } else {
+    log('解说加载失败，已达最大重试次数');
+  }
+});
+
+// ========== 🆕 移动端底部安全区域处理 ==========
+if (isMobile) {
+  // 检测是否有安全区域
+  const safeAreaBottom = getComputedStyle(document.documentElement)
+    .getPropertyValue('padding-bottom');
+  
+  if (safeAreaBottom && safeAreaBottom !== '0px') {
+    log(`移动端：检测到底部安全区域 ${safeAreaBottom}`);
+    
+    // 为解说面板添加额外的底部边距
+    audioPanel.style.paddingBottom = safeAreaBottom;
+  }
+}
+
+// ========== 🆕 用户手势检测（确保自动播放） ==========
+if (isMobile) {
+  let hasInteracted = false;
+  
+  const handleUserInteraction = () => {
+    if (!hasInteracted) {
+      hasInteracted = true;
+      
+      log('移动端：检测到用户交互');
+      
+      setTimeout(() => {
+        try {
+          // 主画面：静音播放
+          videoFrame.contentWindow.postMessage({
+            type: 'play',
+            muted: true,
+            autoplay: true
+          }, '*');
+          
+          // 解说：有声播放
+          audioFrame.contentWindow.postMessage({
+            type: 'play',
+            muted: false,
+            autoplay: true,
+            volume: 1.0
+          }, '*');
+          
+          log('移动端：用户交互后启动自动播放');
+        } catch (e) {
+          log('移动端：无法启动自动播放 - ' + e.message);
+        }
+      }, 100);
+    }
+  };
+  
+  // 监听各种用户交互
+  ['touchstart', 'touchend', 'click', 'scroll'].forEach(eventType => {
+    document.addEventListener(eventType, handleUserInteraction, { once: true, passive: true });
+  });
+  
+  // 监听工具栏按钮点击
+  [toggleAudioBtn, refreshMainBtn, refreshAudioBtn, helpBtn].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', handleUserInteraction, { once: true });
+    }
+  });
+}
+
+// ========== 🆕 移动端横竖屏切换优化 ==========
+if (isMobile) {
+  let currentOrientation = window.orientation || screen.orientation?.angle || 0;
+  
+  const handleOrientationChange = () => {
+    const newOrientation = window.orientation || screen.orientation?.angle || 0;
+    
+    if (newOrientation !== currentOrientation) {
+      currentOrientation = newOrientation;
+      
+      const isLandscape = Math.abs(newOrientation) === 90;
+      log(`移动端：屏幕旋转 - ${isLandscape ? '横屏' : '竖屏'}`);
+      
+      // 横屏时折叠解说面板以获得更好的观看体验
+      if (isLandscape && !audioPanel.classList.contains('collapsed')) {
+        setTimeout(() => {
+          // 可以选择自动折叠，这里注释掉让用户自己控制
+          // togglePanel();
+          // log('移动端：横屏自动折叠解说面板');
+        }, 300);
+      }
+    }
+  };
+  
+  window.addEventListener('orientationchange', handleOrientationChange);
+  window.addEventListener('resize', handleOrientationChange);
+}
+
+// ========== 🆕 定期心跳检测 ==========
+setInterval(() => {
+  if (videoLoaded && audioLoaded) {
+    log('心跳检测：播放器运行中');
+    
+    try {
+      // 定期确保音频状态正确
+      videoFrame.contentWindow.postMessage({
+        type: 'mute',
+        muted: true
+      }, '*');
+      
+      audioFrame.contentWindow.postMessage({
+        type: 'unmute',
+        muted: false
+      }, '*');
+    } catch (e) {
+      // 忽略错误
+    }
+  }
+}, 60000); // 每60秒检查一次
 
 log('脚本初始化完成，等待直播流加载');
 </script>
